@@ -33,6 +33,8 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { Chart } from 'react-charts'
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import axios from 'axios';
+
 const useStyles = makeStyles(theme => ({
     close: {
         padding: theme.spacing(0.5),
@@ -109,14 +111,68 @@ const working_emp = {
     off_hour: 16
 }
 
+function countOffDaySuitable(year, month) {
+
+    var day, counter, date;
+
+    day = 1;
+    counter = 0;
+    date = new Date(year, month, day);
+    while (date.getMonth() === month) {
+        if (date.getDay() === 0 || date.getDay() === 6) { // Sun=0, Mon=1, Tue=2, etc.
+            counter += 1;
+        }
+        day += 1;
+        date = new Date(year, month, day);
+    }
+
+
+    return new Date(year, month, 0).getDate() - counter;
+}
+
+function countOffDaySuitableToCurrentDate(year, month, current_date) {
+    var day, counter, date;
+
+    day = 1;
+    counter = 0;
+    date = new Date(year, month, day);
+    while (date.getMonth() === month && date.getDate() < current_date) {
+        if (date.getDay() === 0 || date.getDay() === 6) { // Sun=0, Mon=1, Tue=2, etc.
+            counter += 1;
+        }
+        day += 1;
+        date = new Date(year, month, day);
+    }
+
+
+    return new Date(year, month, current_date).getDate() - counter;
+}
+
 export default function Profile() {
     const queueRef = React.useRef([]);
     const [open, setOpen] = React.useState(true);
     const [clock, setClock] = React.useState(new Date().toLocaleString());
-    const [stateLockIn, setStateLockIn] = React.useState('enable');
-    const [stateLockOut, setStateLockOut] = React.useState('enable');
+    const [stateLockIn, setStateLockIn] = React.useState(true);
+    const [stateLockOut, setStateLockOut] = React.useState(true);
+    const [user, setUser] = React.useState(
+        {id: "1", username: "phuocnd", role: "admin"}
+    );
+    const [emp, setEmp] = React.useState({});
     const classes = useStyles();
     const classesGrid = useStylesGrid();
+    const [dataWorkingHours, setDataWorkingHours] = React.useState(
+        {
+            label: 'Working hours',
+            data: [['January', 0], ['February', 0], ['March', 0], ['April', 0], ['May', 0], ['July', 0], ['June', 0], ['August', 0], ['September', 0], ['October', 0], ['November', 0], ['December', 0]]
+        }
+    );
+    const [dataOffHours, setDataOffHours] = React.useState(
+        {
+            label: 'Off hours',
+            data: [['January', 0], ['February', 0], ['March', 0], ['April', 0], ['May', 0], ['July', 0], ['June', 0], ['August', 0], ['September', 0], ['October', 0], ['November', 0], ['December', 0]]
+        }
+    );
+    var today = new Date();
 
     React.useEffect(() => {
         var timerID = setInterval(() => tick(), 1000);
@@ -127,30 +183,21 @@ export default function Profile() {
     });
 
     const clickClockIn = () => {
-        setStateLockIn('disable');
+        setStateLockIn(true);
     }
 
     const clickClockOut = () => {
-        setStateLockOut('disable');
+        setStateLockOut(true);
     }
 
     function tick() {
         setClock(new Date().toLocaleString());
     }
 
-    const data = React.useMemo(
-        () => [
-            {
-                label: 'Working hours',
-                data: [['January', 168], ['February', 150], ['March', 160], ['April', 0], ['May', 0], ['July', 0], ['June', 0], ['August', 0], ['September', 0], ['October', 0], ['November', 0], ['December', 0]]
-            },
-            {
-                label: 'Off hours',
-                data: [['January', 128], ['February', 168], ['March', 120], ['April', 0], ['May', 0], ['July', 0], ['June', 0], ['August', 0], ['September', 0], ['October', 0], ['November', 0], ['December', 0]]
-            },
-        ],
-        []
-    )
+    const data = [
+        dataWorkingHours,
+        dataOffHours
+    ]
 
     const series = React.useMemo(
         () => ({
@@ -167,21 +214,93 @@ export default function Profile() {
         []
     )
 
+    React.useEffect(() => {
+        //Set user from widowStorage Session
+        setUser(JSON.parse(window.sessionStorage.getItem("user")));
+        console.log(user)
+        axios.get(`/api/profile/` + user.id)
+            .then(res => {
+                const data_emps = res.data;
+                setEmp(data_emps);
+            })
+            .catch(error => console.log(error));
+    }, [])
+
+    React.useEffect(() => {
+        var d = new Date();
+        axios.get(`/api_working/number_hour_off?id=`+ user.id + '&date_month=' + d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate())
+            .then(res => {
+                var month = 0;
+                var date = new Date(d.getFullYear(), month, 1);
+                while (date.getMonth() < d.getMonth()) {
+
+                    var data = dataOffHours;
+                    data.data[month][1] = res.data - (new Date(date.getFullYear(), date.getMonth(), 0).getDate() - countOffDaySuitable(date.getFullYear(), date.getMonth())) * 8;
+
+                    setDataOffHours(data);
+                    month += 1;
+                    date = new Date(d.getFullYear(), month, 1);
+
+                    if (month === date.getMonth()) {
+                        data.data[month][1] = (countOffDaySuitableToCurrentDate(today.getFullYear(), today.getMonth(), today.getDate()) * 8 + emp.actualHourOff) - emp.actualWorkingDayHour;
+                        setDataOffHours(data);
+                    }
+                }
+            })
+            .catch(error => console.log(error));
+    })
+
+    React.useEffect(() => {
+        var d = new Date();
+        var month = 0;
+        var date = new Date(d.getFullYear(), month, 1);
+        while (date.getMonth() < d.getMonth()) {
+
+            var dataWorking = dataWorkingHours;
+            dataWorking.data[month][1] = countOffDaySuitable(date.getFullYear(), date.getMonth()) * 8 - dataOffHours.data[month][1];
+            setDataWorkingHours(dataWorking);
+
+            month += 1;
+            date = new Date(d.getFullYear(), month, 1);
+
+            if (month === date.getMonth()) {
+                dataWorking.data[month][1] = emp.actualWorkingDayHour;
+                setDataWorkingHours(dataWorking);
+            }
+        }
+    })
+
+    React.useEffect(() => {
+        axios.get(`/api_working/isChecked?id=`+ user.id)
+            .then(res => {
+                var isChecked = res.data;
+                console.log(isChecked)
+                if (isChecked == 1){
+                    setStateLockIn(true);
+                }
+                else {
+                    setStateLockIn(false);
+                }
+            })
+            .catch(error => console.log(error));
+    })  
+
     return (
         <div className={classes.root}>
             <div className={classesGrid.root}>
                 <Paper className={classesGrid.paper}>
                     <Grid container spacing={2}>
                         <Grid className={classesGrid.clock} item xs={3}>
-                        <BellIcon width='50' height="50" active={true} animate={true} color='#4caf50' />
-                        <span> </span>{clock}
+                            <BellIcon width='50' height="50" active={true} animate={true} color='#4caf50' />
+                            <span> </span>{clock}
                         </Grid>
                         <Grid item xs={3}>
                             <Button
                                 variant="contained"
                                 color="primary"
                                 className={classes.button}
-                                endIcon={<CheckCircleOutlineIcon clickClockIn/>}
+                                endIcon={<CheckCircleOutlineIcon clickClockIn />}
+                                disabled={stateLockIn}
                             >
                                 {'CLOCK-IN !!!'}
                             </Button>
@@ -189,9 +308,10 @@ export default function Profile() {
                                 variant="contained"
                                 color="secondary"
                                 className={classes.button}
-                                endIcon={<CheckCircleOutlineIcon clickClockOut/>}
+                                endIcon={<CheckCircleOutlineIcon clickClockOut />}
+                                disabled={stateLockIn}
                             >
-                                {'CLOCK-OUT !!!'}   
+                                {'CLOCK-OUT !!!'}
                             </Button>
                         </Grid>
                     </Grid>
@@ -211,11 +331,11 @@ export default function Profile() {
                                         <TableCell className={classesGrid.nameField} component="th" scope="row">
                                             USERNAME:
                                         </TableCell>
-                                        <TableCell align="left">{working_emp.username}</TableCell>
+                                        <TableCell align="left">{emp.emp_code}</TableCell>
                                         <TableCell className={classesGrid.nameField} component="th" scope="row">
                                             FULL NAME:
                                         </TableCell>
-                                        <TableCell align="left">{working_emp.fullName}</TableCell>
+                                        <TableCell align="left">{emp.emp_name}</TableCell>
                                         <TableCell className={classesGrid.nameField} component="th" scope="row">
                                         </TableCell>
                                         <TableCell align="left"></TableCell>
@@ -224,15 +344,15 @@ export default function Profile() {
                                         <TableCell className={classesGrid.nameField} component="th" scope="row">
                                             ACTUAL WORKING DAY:
                                         </TableCell>
-                                        <TableCell align="left">{working_emp.day_checked}/{working_emp.day_working_actual} (days)</TableCell>
+                                        <TableCell align="left">{emp.actualWorkingDay}/{countOffDaySuitable(today.getFullYear(), today.getMonth())} (days)</TableCell>
                                         <TableCell className={classesGrid.nameField} component="th" scope="row">
                                             ACTUAL WORKING HOUR:
                                         </TableCell>
-                                        <TableCell align="left">{working_emp.working_hour}/{working_emp.day_working_actual * 8} (hours)</TableCell>
+                                        <TableCell align="left">{emp.actualWorkingDayHour}/{countOffDaySuitable(today.getFullYear(), today.getMonth()) * 8} (hours)</TableCell>
                                         <TableCell className={classesGrid.nameField} component="th" scope="row">
                                             HOURS OFF:
                                         </TableCell>
-                                        <TableCell align="left">{working_emp.off_hour} (hours)</TableCell>
+                                        <TableCell align="left">{(countOffDaySuitableToCurrentDate(today.getFullYear(), today.getMonth(), 20) * 8 + emp.actualHourOff) - emp.actualWorkingDayHour} (hours)</TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table>

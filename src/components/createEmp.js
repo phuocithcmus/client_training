@@ -33,9 +33,9 @@ import {
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
-
+import axios from 'axios';
 import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
-
+import moment from 'moment';
 
 export function useRouter() {
     return useContext(RouterContext);
@@ -99,6 +99,17 @@ export default function CreateEmployee() {
     // The first commit of Material-UI
     const [selectedDate, setSelectedDate] = React.useState(new Date());
 
+    const [department, setDepartment] = React.useState([]);
+    const [title, setTitle] = React.useState([]);
+    const [manager, setManager] = React.useState([]);
+
+    const [genderOption, setGenderOption] = React.useState("");
+    const [departmentOption, setdepartmentOption] = React.useState("");
+    const [titleOption, settitleOption] = React.useState("");
+    const [birthdayOption, setbirthdayOption] = React.useState(moment(new Date()).format('YYYY-MM-DD'));
+    const [roleOption, setRoleOption] = React.useState(0);
+    const [mngOption, setMngOption] = React.useState([]);
+
     const handleMenu = event => {
         setAnchorEl(event.currentTarget);
     };
@@ -108,12 +119,113 @@ export default function CreateEmployee() {
     };
 
     const handleDateChange = date => {
-        setSelectedDate(date);
+        console.log(moment(date).format('YYYY-MM-DD'));
+        setbirthdayOption(moment(date).format('YYYY-MM-DD'));
     };
 
     const handleChangeGender = event => {
-        setGender(event.target.value);
+        setGenderOption(event.target.value);
     };
+
+    const handleChangeDepartment = event => {
+        let id_dep = event.target.value;
+        setdepartmentOption(id_dep);
+
+        axios.get(`/api/employees?department=` + id_dep)
+            .then(res => {
+                const data = res.data;
+                console.log(data);
+                setManager(data);
+            })
+            .catch(error => console.log(error));
+    };
+
+    const handleChangeTitle = event => {
+        settitleOption(event.target.value);
+    };
+
+    const handleChangeRole = event => {
+        setRoleOption(event.target.value);
+    };
+
+    const handleChangeMng = event => {
+        setMngOption(event.target.value);
+    };
+
+    const handlerCreateEmp = () => {
+        var emp = {
+            emp_code: document.getElementById('username').value,
+            emp_name: document.getElementById('name').value,
+            gender: genderOption,
+            address: document.getElementById('address').value,
+            dob: birthdayOption,
+            phone_number: document.getElementById('phoneNumber').value,
+            identification_card: document.getElementById('identification_card').value,
+            emp_department: departmentOption,
+            emp_title: titleOption,
+            role: roleOption,
+            date_join: "",
+            note: "",
+            emp_mng: mngOption,
+        }
+
+        console.log(emp);
+        axios({
+            method: 'post',
+            headers: {    
+                'crossDomain': true,
+                //'Content-Type': 'application/json',
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            url: '/api/employees/create',
+            data: emp,
+        })
+        .then(function(response) {
+            var data = response.data;
+            console.log(data);
+            //if login token works then get records
+        })
+        .catch(function(xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        });
+        // axios.post(`http://0.0.0.0:9001/api/employees/create`, emp ,
+        //     {
+        //         headers: {
+        //         'Content-Type': 'application/x-www-form-urlencoded',
+        //         'Access-Control-Allow-Origin': '*',
+        //         "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+        //         "Access-Control-Allow-Headers": "Origin, Content-Type, X-Auth-Token"
+        //     },
+        //     responseType: 'json',
+        // })
+        //     .then(res => {
+        //         const isSuccess = res.data;
+        //         console.log(isSuccess);
+        //         // setLoading(false);
+        //         // setOpacity(1);
+        //         window.location.reload(false);
+        //     })
+        //     .catch(error => console.log(error));
+    }
+
+    React.useEffect(() => {
+        axios.get(`/api/department`)
+            .then(res => {
+                const data = res.data;
+                console.log(data);
+                setDepartment(data);
+            })
+            .catch(error => console.log(error));
+
+        axios.get(`/api/title`)
+            .then(res => {
+                const data = res.data;
+                console.log(data);
+                setTitle(data);
+            })
+            .catch(error => console.log(error));
+    }, [])
 
     return (
         <div className={classesBar.root}>
@@ -161,36 +273,46 @@ export default function CreateEmployee() {
                             <div className={classesGrid.title}>Tạo tài khoản nhân viên</div>
                         </Grid>
                     </Grid>
-                    <hr/>
-                    <br/>
+                    <hr />
+                    <br />
                     <Grid container spacing={4}>
                         <Grid item xs={6}>
-                            <TextField className={classesGrid.textfield} fullWidth id="outlined-basic" label="Tên tài khoản" variant="outlined" InputProps={{
+                            <TextField className={classesGrid.textfield} fullWidth id="username" label="Tên tài khoản" variant="outlined" InputProps={{
                                 endAdornment: (
                                     <AccountCircle />
                                 ),
                             }} />
                         </Grid>
                         <Grid item xs={6}>
-                            <TextField className={classesGrid.textfield} fullWidth id="outlined-basic" label="Mật khẩu" variant="outlined" InputProps={{
+                            {/* <TextField className={classesGrid.textfield} fullWidth id="password" label="Mật khẩu" variant="outlined" InputProps={{
                                 endAdornment: (
                                     <CompassCalibrationIcon />
                                 ),
-                            }} />
+                            }} /> */}
+
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="role"
+                                value={roleOption}
+                                onChange={handleChangeRole}
+                            >
+                                <MenuItem value={'1'}>Admin</MenuItem>
+                                <MenuItem value={'0'}>User</MenuItem>
+                            </Select>
                         </Grid>
                     </Grid>
-                        <hr/>
-                        <br/>
+                    <hr />
+                    <br />
                     <Grid container spacing={4}>
                         <Grid item xs={6}>
-                            <TextField className={classesGrid.textfield} id="outlined-basic" label="Họ tên" variant="outlined" InputProps={{
+                            <TextField className={classesGrid.textfield} id="name" label="Họ tên" variant="outlined" InputProps={{
                                 endAdornment: (
                                     <AccountBoxIcon />
                                 ),
                             }} />
                         </Grid>
                         <Grid item xs={6}>
-                            <TextField className={classesGrid.textfield} id="outlined-basic" label="Số điện thoại" variant="outlined" InputProps={{
+                            <TextField className={classesGrid.textfield} id="phoneNumber" label="Số điện thoại" variant="outlined" InputProps={{
                                 endAdornment: (
                                     <PhoneIcon />
                                 ),
@@ -199,7 +321,7 @@ export default function CreateEmployee() {
                     </Grid>
                     <Grid container spacing={4}>
                         <Grid item xs={6}>
-                            <TextField className={classesGrid.textfield} id="outlined-basic" label="Địa chỉ" variant="outlined" InputProps={{
+                            <TextField className={classesGrid.textfield} id="address" label="Địa chỉ" variant="outlined" InputProps={{
                                 endAdornment: (
                                     <ContactsIcon />
                                 ),
@@ -213,9 +335,9 @@ export default function CreateEmployee() {
                                         variant="inline"
                                         format="MM/dd/yyyy"
                                         margin="normal"
-                                        id="date-picker-inline"
+                                        id="dob"
                                         label="Ngày sinh"
-                                        value={selectedDate}
+                                        value={birthdayOption}
                                         onChange={handleDateChange}
                                         KeyboardButtonProps={{
                                             'aria-label': 'change date',
@@ -227,7 +349,7 @@ export default function CreateEmployee() {
                     </Grid>
                     <Grid container spacing={2}>
                         <Grid item xs={3}>
-                            <TextField className={classesGrid.textfield} id="outlined-basic" label="CMND" variant="outlined" InputProps={{
+                            <TextField className={classesGrid.textfield} id="identification_card" label="CMND" variant="outlined" InputProps={{
                                 endAdornment: (
                                     <FingerprintIcon />
                                 ),
@@ -238,12 +360,14 @@ export default function CreateEmployee() {
                                 <InputLabel id="demo-simple-select-label">Giới tính</InputLabel>
                                 <Select
                                     labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
-                                    value={gender}
+                                    id="gender"
+                                    value={genderOption}
                                     onChange={handleChangeGender}
                                 >
-                                    <MenuItem value={1}>Nam</MenuItem>
-                                    <MenuItem value={0}>Nu</MenuItem>
+                                    <MenuItem value={'M'}>Nam</MenuItem>
+                                    <MenuItem value={'F'}>Nu</MenuItem>
+                                    <MenuItem value={'U'}>Khong xac dinh</MenuItem>
+                                    <MenuItem value={'I'}>Khong cung cap</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -251,34 +375,62 @@ export default function CreateEmployee() {
                             <FormControl className={classesGrid.textfield}>
                                 <InputLabel id="demo-simple-select-label">Phòng</InputLabel>
                                 <Select
-                                    id="demo-simple-select"
-                                    value={gender}
-                                    onChange={handleChangeGender}
+                                    id="department"
+                                    value={departmentOption}
+                                    onChange={handleChangeDepartment}
                                 >
-                                    <MenuItem value={1}>Room 1</MenuItem>
-                                    <MenuItem value={0}>Room 1</MenuItem>
+                                    {
+                                        department.map(d => (
+                                            <MenuItem value={d.id}>{d.department_name}</MenuItem>
+                                        ))
+                                    }
+
                                 </Select>
                             </FormControl>
                         </Grid>
+
                         <Grid item xs={3}>
                             <FormControl className={classesGrid.textfield}>
                                 <InputLabel id="demo-simple-select-label">Chức vụ</InputLabel>
                                 <Select
                                     labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
-                                    value={gender}
-                                    onChange={handleChangeGender}
+                                    id="title"
+                                    value={titleOption}
+                                    onChange={handleChangeTitle}
                                     placeholder="Chức vụ"
                                 >
-                                    <MenuItem value={1}>Trưởng</MenuItem>
-                                    <MenuItem value={0}>Phó</MenuItem>
+                                    {
+                                        title.map(t => (
+                                            <MenuItem value={t.id}>{t.title_name}</MenuItem>
+                                        ))
+                                    }
                                 </Select>
                             </FormControl>
                         </Grid>
                     </Grid>
                     <Grid container spacing={4}>
+                        <Grid item xs={3}>
+                            <FormControl className={classesGrid.textfield}>
+                                <InputLabel id="demo-simple-select-label">Người quản lý</InputLabel>
+                                <Select
+                                    id="manager"
+                                    value={mngOption}
+                                    onChange={handleChangeMng}
+                                >
+                                    {
+                                        manager.map(m => (
+                                            <MenuItem value={m.id}>{m.emp_name}</MenuItem>
+                                        ))
+                                    }
+
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                    </Grid>
+
+                    <Grid container spacing={4}>
                         <Grid item>
-                            <Button style={{width: '150px'}}size="medium" variant="contained" color="primary" href="#contained-buttons">
+                            <Button style={{ width: '150px' }} size="medium" variant="contained" color="primary" onClick={() => { handlerCreateEmp() }}>
                                 Tạo
                                 </Button>
                         </Grid>

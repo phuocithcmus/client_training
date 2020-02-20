@@ -11,6 +11,7 @@ import CompassCalibrationIcon from '@material-ui/icons/CompassCalibration';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import GoogleLogin from 'react-google-login';
+import axios from 'axios';
 
 export function useRouter() {
     return useContext(RouterContext);
@@ -51,14 +52,38 @@ const useStylesGrid = makeStyles(theme => ({
 
 export default function LoginPage() {
     const classesGrid = useStylesGrid();
-    const [user, setUser] = useState({
-        email: "",
-        password: ""
-    });
     const { history } = useRouter();
 
     const responseGoogle = (response) => {
-        console.log(response);
+        var finalData = { id: '1', username:'phuocnd', role: 'admin' }
+        
+        axios({
+            method: 'post',
+            headers: {    
+                'crossDomain': true,
+                //'Content-Type': 'application/json',
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            url: '/api_working/login',
+            data: {
+                emp_code:'phuocnd'
+            },
+        })
+        .then(function(response) {
+            finalData = response.data;
+            window.sessionStorage.setItem('user', JSON.stringify(finalData));
+            console.log(finalData);
+            if (finalData.role == 1){
+                history.push("/employees");
+            }
+            else if (finalData.role == 0){
+                history.push("/profile");
+            }
+        })
+        .catch(function(xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        });
     }
     return (
         <div className={classesGrid.root}>
@@ -71,7 +96,7 @@ export default function LoginPage() {
                 <hr />
                 <Grid container spacing={2}>
                     <Grid item xs={8}>
-                        <GoogleLogin 
+                        <GoogleLogin
                             clientId="" //CLIENTID NOT CREATED YET
                             buttonText="Đăng nhập với google"
                             onSuccess={responseGoogle}
@@ -102,7 +127,7 @@ export default function LoginPage() {
                 </Grid>
                 <Grid container spacing={2}>
                     <Grid item xs={4}>
-                        <Button size="medium" variant="contained" color="primary" onClick={() => { login() }}>
+                        <Button size="medium" variant="contained" color="primary" onClick={() => { responseGoogle() }}>
                             Đăng nhập
                                 </Button>
                     </Grid>
@@ -117,12 +142,6 @@ export default function LoginPage() {
         const password = document.getElementById("password").value;
         console.log(email)
         console.log(password)
-
-        email === "a" && password === "a" ? setUser({
-            email: "aaaaa",
-            password: "aaaa"
-        }) : console.log("Access Deneid", "Please Enter Correct Email And Password");
-        console.log(user)
         history.push("/employees");
     }
 }

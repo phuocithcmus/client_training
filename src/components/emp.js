@@ -24,6 +24,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import axios from 'axios';
 
 export function useRouter() {
     return useContext(RouterContext);
@@ -72,7 +73,6 @@ const useStylesGrid = makeStyles(theme => ({
     title: {
         fontWeight: 'bold',
         fontSize: '24px',
-        fontFamily: 'Roboto',
         color: '#34495e',
     },
     nameField: {
@@ -113,6 +113,19 @@ export default function Employee() {
         phone: '0123456789',
         position: 'Controller',
     };
+
+    const [data, setDataEmp] = React.useState({});
+
+    React.useEffect(() => {
+        console.log(`/api/employees/` + id);
+        axios.get(`/api/employees/` + id)
+            .then(res => {
+                const data_emp = res.data;
+                console.log(data_emp);
+                setDataEmp(data_emp);
+            })
+            .catch(error => console.log(error));
+    }, [])
 
     return (
         <div className={classesBar.root}>
@@ -164,28 +177,28 @@ export default function Employee() {
                             <Table aria-label="caption table">
                                 <TableBody>
                                     <TableRow>
-                                        <TableCell className={classesGrid.nameField} component="th" scope="row">
+                                        <TableCell width={'16.67%'} className={classesGrid.nameField} component="th" scope="row">
                                             ID:
                                         </TableCell>
-                                        <TableCell align="left">{employee.id}</TableCell>
-                                        <TableCell className={classesGrid.nameField} component="th" scope="row">
+                                        <TableCell width={'16.67%'} align="left">{data.id}</TableCell>
+                                        <TableCell width={'16.67%'} className={classesGrid.nameField} component="th" scope="row">
                                             USERNAME:
                                         </TableCell>
-                                        <TableCell align="left">{employee.username}</TableCell>
-                                        <TableCell className={classesGrid.nameField} component="th" scope="row">
+                                        <TableCell width={'16.67%'} align="left">{data.emp_code}</TableCell>
+                                        <TableCell width={'16.67%'} className={classesGrid.nameField} component="th" scope="row">
                                             NAME:
                                         </TableCell>
-                                        <TableCell align="left">{employee.name}</TableCell>
+                                        <TableCell width={'16.67%'} align="left">{data.emp_name}</TableCell>
                                     </TableRow>
                                     <TableRow >
-                                        <TableCell className={classesGrid.nameField} component="th" scope="row">
+                                        <TableCell width={'16.67%'} className={classesGrid.nameField} component="th" scope="row">
                                             GENDER:
                                         </TableCell>
-                                        <TableCell align="left">{employee.gender}</TableCell>
-                                        <TableCell className={classesGrid.nameField} component="th" scope="row">
+                                        <TableCell width={'16.67%'} align="left">{data.gender}</TableCell>
+                                        <TableCell width={'16.67%'} className={classesGrid.nameField} component="th" scope="row">
                                             BIRTHDAY:
                                         </TableCell>
-                                        <TableCell align="left">{employee.birthdate.toDateString()}</TableCell>
+                                        <TableCell width={'16.67%'} align="left">{data.dob}</TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table>
@@ -203,38 +216,38 @@ export default function Employee() {
                             <Table aria-label="caption table">
                                 <TableBody>
                                     <TableRow>
-                                        <TableCell className={classesGrid.nameField} component="th" scope="row">
+                                        <TableCell width={'16.67%'} className={classesGrid.nameField} component="th" scope="row">
                                             ADDRESS:
                                         </TableCell>
-                                        <TableCell align="left">{employee.address}</TableCell>
-                                        <TableCell className={classesGrid.nameField} component="th" scope="row">
+                                        <TableCell width={'16.67%'} align="left">{data.address}</TableCell>
+                                        <TableCell width={'16.67%'} className={classesGrid.nameField} component="th" scope="row">
                                             IDENTIFICATION CARD:
                                         </TableCell>
-                                        <TableCell align="left">{employee.icard}</TableCell>
-                                        <TableCell className={classesGrid.nameField} component="th" scope="row">
+                                        <TableCell width={'16.67%'} align="left">{data.identification_card}</TableCell>
+                                        <TableCell width={'16.67%'} className={classesGrid.nameField} component="th" scope="row">
                                             PHONE NUMBER:
                                         </TableCell>
-                                        <TableCell align="left">{employee.phone}</TableCell>
+                                        <TableCell width={'16.67%'} align="left">{data.phone_number}</TableCell>
                                     </TableRow>
                                     <TableRow >
-                                        <TableCell className={classesGrid.nameField} component="th" scope="row">
+                                        <TableCell width={'16.67%'} className={classesGrid.nameField} component="th" scope="row">
                                             ROOM:
                                         </TableCell>
-                                        <TableCell align="left">{employee.room}</TableCell>
-                                        <TableCell className={classesGrid.nameField} component="th" scope="row">
+                                        <TableCell width={'16.67%'} align="left">{data.emp_department}</TableCell>
+                                        <TableCell width={'16.67%'} className={classesGrid.nameField} component="th" scope="row">
                                             POSITION:
                                         </TableCell>
-                                        <TableCell align="left">{employee.position}</TableCell>
-                                        <TableCell className={classesGrid.nameField} component="th" scope="row">
+                                        <TableCell width={'16.67%'} align="left">{data.emp_title}</TableCell>
+                                        <TableCell width={'16.67%'} className={classesGrid.nameField} component="th" scope="row">
                                             HIRE DATE:
                                         </TableCell>
-                                        <TableCell align="left">{employee.hiredate.toDateString()}</TableCell>
+                                        <TableCell width={'16.67%'} align="left">{data.date_join}</TableCell>
                                     </TableRow>
                                     <TableRow >
-                                        <TableCell className={classesGrid.nameField} component="th" scope="row">
+                                        <TableCell width={'16.67%'} className={classesGrid.nameField} component="th" scope="row">
                                             LEFT DATE:
                                         </TableCell>
-                                        <TableCell align="left">{employee.leftdate}</TableCell>
+                                        <TableCell width={'16.67%'} align="left">{data.date_left}</TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table>

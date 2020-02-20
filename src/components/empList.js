@@ -37,6 +37,13 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import AddBoxIcon from '@material-ui/icons/AddBox';
+import axios from 'axios';
+import { set } from 'date-fns';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Modal from '@material-ui/core/Modal';
+import { turquoise } from 'color-name';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
 
 export function useRouter() {
     return useContext(RouterContext);
@@ -153,7 +160,7 @@ const rows = [
     createData(6, 'Honeycomb', 408, 3.2, 0),
     createData(7, 'Ice cream sandwich', 237, 9.0, 0),
     createData(8, 'Jelly Bean', 375, 0.0, 0),
-    createData(9, 'KitKat', 518, 26.0, 0),
+    createData(9, 'KitKat', 518, 26.0, 0), ,
     createData(10, 'Lollipop', 392, 0.2, 0),
     createData(11, 'Marshmallow', 318, 0, 0),
     createData(12, 'Nougat', 360, 19.0, 0),
@@ -177,8 +184,18 @@ const useStyles2 = makeStyles({
     }
 });
 
-export default function CustomPaginationActionsTable() {
+const useStylesModal = makeStyles({
+    modal: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+});
+
+
+export default function Employees() {
     const classes = useStyles2();
+    const classesModal = useStylesModal();
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const classesBar = useStylesBar();
@@ -187,6 +204,21 @@ export default function CustomPaginationActionsTable() {
     const open = Boolean(anchorEl);
     const { history } = useRouter();
     const [openNoti, setOpen] = React.useState(false);
+    const [datas, setDataEmp] = React.useState([]);
+    const [idEmp, setIdEmp] = React.useState(0);
+    const [loading, setLoading] = React.useState(false);
+    const [openModal, setOpeModal] = React.useState(false);
+    const [opa, setOpacity] = React.useState(1);
+
+    React.useEffect(() => {
+        axios.get(`http://0.0.0.0:9001/api/employees`)
+            .then(res => {
+                const data_emps = res.data;
+                console.log(data_emps);
+                setDataEmp(data_emps);
+            })
+            .catch(error => console.log(error));
+    }, [])
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
@@ -211,12 +243,29 @@ export default function CustomPaginationActionsTable() {
         history.push("/employee/id/" + id);
     };
 
-    const openDialogDeactive = () => {
+    const openDialogDeactive = (id) => {
         setOpen(true);
+        setIdEmp(id);
     };
 
     const closeDialogDeactive = () => {
         setOpen(false);
+    };
+
+    const agreeDeactive = (id) => {
+        setOpen(false);
+        setLoading(true);
+        setOpacity(0.7);
+        console.log(idEmp);
+        axios.post(`/api/employees/deactiveEmp/` + idEmp)
+            .then(res => {
+                const isActive = res.data;
+                console.log(isActive);
+                setLoading(false);
+                setOpacity(1);
+                window.location.reload(false);
+            })
+            .catch(error => console.log(error));
     };
 
     const handleCreate = () => {
@@ -224,7 +273,8 @@ export default function CustomPaginationActionsTable() {
     }
 
     return (
-        <div className={classesBar.root}>
+        <div className={classesBar.root} style={{backgroundColor:'transparent',
+        opacity: {opa}}}>
             <AppBar position="static">
                 <Toolbar>
                     <Typography variant="h6" className={classesBar.title}>
@@ -267,7 +317,7 @@ export default function CustomPaginationActionsTable() {
                 <Button
                     variant="contained"
                     color="primary"
-                    endIcon={<AddBoxIcon clickClockIn />}
+                    endIcon={<AddBoxIcon />}
                     onClick={handleCreate}
                 >
                     {'Tạo mới'}
@@ -277,24 +327,46 @@ export default function CustomPaginationActionsTable() {
                 <Table className={classes.table} aria-label="custom pagination table">
                     <TableHead className={classes.tableHead}>
                         <TableRow >
-                            <TableCell style={{color: 'white', fontWeight: 'bold',}}>Dessert (100g serving)</TableCell>
-                            <TableCell style={{color: 'white', fontWeight: 'bold',}} align="right">Calories</TableCell>
-                            <TableCell style={{color: 'white', fontWeight: 'bold',}} align="right">Fat&nbsp;</TableCell>
-                            <TableCell style={{color: 'white', fontWeight: 'bold',}} align="right">Action&nbsp;</TableCell>
+                            <TableCell width={'7%'} style={{ color: 'white', fontWeight: 'bold', }} align="left">EMP CODE</TableCell>
+                            <TableCell width={'10%'} style={{ color: 'white', fontWeight: 'bold', }} align="left">EMP NAME&nbsp;</TableCell>
+                            <TableCell width={'3%'} style={{ color: 'white', fontWeight: 'bold', }} align="left">GENDER&nbsp;</TableCell>
+                            <TableCell width={'10%'} style={{ color: 'white', fontWeight: 'bold', }} align="left">DOB&nbsp;</TableCell>
+                            <TableCell width={'5%'} style={{ color: 'white', fontWeight: 'bold', }} align="left">ADDRESS&nbsp;</TableCell>
+                            <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">PHONE NUMBER&nbsp;</TableCell>
+                            <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">IDENTIFICATION CARD&nbsp;</TableCell>
+                            <TableCell width={'15%'} style={{ color: 'white', fontWeight: 'bold', }} align="left">DATE JOIN&nbsp;</TableCell>
+                            <TableCell width={'15%'} style={{ color: 'white', fontWeight: 'bold', }} align="left">DATE LEFT&nbsp;</TableCell>
+                            <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">NOTE&nbsp;</TableCell>
+                            <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">EMP MNG&nbsp;</TableCell>
+                            <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">EMP DEPARTMENT&nbsp;</TableCell>
+                            <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">EMP TITLE&nbsp;</TableCell>
+                            <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">ROLE&nbsp;</TableCell>
+                            <TableCell width={'10%'} style={{ color: 'white', fontWeight: 'bold', }} align="left">ACTION&nbsp;</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {(rowsPerPage > 0
-                            ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                            : rows
+                            ? datas.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            : datas
                         ).map(row => (
-                            <TableRow id={row.id} key={row.name}>
+                            <TableRow id={row.id}>
                                 <TableCell component="th" scope="row">
-                                    {row.name}
+                                    {row.emp_code}
                                 </TableCell>
-                                <TableCell align="right">{row.calories}</TableCell>
-                                <TableCell align="right">{row.fat}</TableCell>
-                                <TableCell align="right">
+                                <TableCell align="left">{row.emp_name}</TableCell>
+                                <TableCell align="left">{row.gender}</TableCell>
+                                <TableCell align="left">{row.dob}</TableCell>
+                                <TableCell align="left">{row.address}</TableCell>
+                                <TableCell align="left">{row.phone_number}</TableCell>
+                                <TableCell align="left">{row.identification_card}</TableCell>
+                                <TableCell align="left">{row.date_join}</TableCell>
+                                <TableCell align="left">{row.date_left}</TableCell>
+                                <TableCell align="left">{row.note}</TableCell>
+                                <TableCell align="left">{row.emp_mng}</TableCell>
+                                <TableCell align="left">{row.emp_department}</TableCell>
+                                <TableCell align="left">{row.emp_title}</TableCell>
+                                <TableCell align="left">{row.role == 1 ? 'Admin' : 'User'}</TableCell>
+                                <TableCell align="left">
                                     <IconButton
                                         aria-label="Show information employee"
                                         onClick={() => { showInfo(row.id) }}
@@ -304,7 +376,7 @@ export default function CustomPaginationActionsTable() {
                                     </IconButton>
                                     <IconButton
                                         aria-label="deactive employee"
-                                        onClick={openDialogDeactive}
+                                        onClick={() => { openDialogDeactive(row.id) }}
                                         color="inherit"
                                     >
                                         <LockOpenIcon />
@@ -314,7 +386,7 @@ export default function CustomPaginationActionsTable() {
                                         onClose={closeDialogDeactive}
                                         aria-labelledby="alert-dialog-title"
                                         aria-describedby="alert-dialog-description"
-                                        style={{ opacity: 0.3, }}
+                                        style={{ opacity: 1, }}
                                         color="inherit"
                                     >
                                         <DialogTitle id="alert-dialog-title">{"Deactive Employee?"}</DialogTitle>
@@ -327,7 +399,7 @@ export default function CustomPaginationActionsTable() {
                                             <Button variant="contained" onClick={closeDialogDeactive} color="primary">
                                                 Disagree
                                             </Button>
-                                            <Button variant="contained" onClick={closeDialogDeactive} color="primary" autoFocus>
+                                            <Button variant="contained" onClick={() => { agreeDeactive(row.id) }} color="primary" autoFocus>
                                                 Agree
                                             </Button>
                                         </DialogActions>
@@ -343,11 +415,11 @@ export default function CustomPaginationActionsTable() {
                         )}
                     </TableBody>
                     <TableFooter>
-                        <TableRow>
+                        <TableRow >
                             <TablePagination
                                 rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
                                 colSpan={4}
-                                count={rows.length}
+                                count={datas.length}
                                 rowsPerPage={rowsPerPage}
                                 page={page}
                                 SelectProps={{
@@ -362,6 +434,20 @@ export default function CustomPaginationActionsTable() {
                     </TableFooter>
                 </Table>
             </TableContainer>
+            {
+                loading && <div className={classesModal.modal}>
+                    <CircularProgress />
+                </div>
+                //     <Modal
+                //     aria-labelledby="transition-modal-title"
+                //     aria-describedby="transition-modal-description"
+                //     className={classesModal.modal}
+                //     open={true}
+                //     closeAfterTransition
+                // >
+                //     <CircularProgress />
+                // </Modal>
+            }
         </div>
     );
 }
