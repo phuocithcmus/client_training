@@ -129,7 +129,7 @@ export default function Employee() {
 
     return (
         <div className={classesBar.root}>
-            <AppBar position="static">
+            {/* <AppBar position="static">
                 <Toolbar>
                     <Typography variant="h6" className={classesBar.title}>
                         Employee {id}
@@ -164,7 +164,7 @@ export default function Employee() {
                         </Menu>
                     </div>
                 </Toolbar>
-            </AppBar>
+            </AppBar> */}
             <div className={classesGrid.root}>
                 <Paper className={classesGrid.paper}>
                     <Grid container spacing={2}>

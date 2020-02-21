@@ -199,7 +199,7 @@ export default function Employees() {
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const classesBar = useStylesBar();
-    const [auth, setAuth] = React.useState(true);
+    const [auth, setAuth] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const { history } = useRouter();
@@ -218,6 +218,11 @@ export default function Employees() {
                 setDataEmp(data_emps);
             })
             .catch(error => console.log(error));
+        
+        var auth_check =  JSON.parse(window.sessionStorage.getItem("user")).role;
+        if(auth_check == 1){
+            setAuth(true);
+        }
     }, [])
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
@@ -275,7 +280,7 @@ export default function Employees() {
     return (
         <div className={classesBar.root} style={{backgroundColor:'transparent',
         opacity: {opa}}}>
-            <AppBar position="static">
+            {/* <AppBar position="static">
                 <Toolbar>
                     <Typography variant="h6" className={classesBar.title}>
                         Employee List
@@ -312,11 +317,11 @@ export default function Employees() {
                         </div>
                     )}
                 </Toolbar>
-            </AppBar>
+            </AppBar> */}
             <div className={classes.button}>
                 <Button
                     variant="contained"
-                    color="primary"
+                    color="secondary"
                     endIcon={<AddBoxIcon />}
                     onClick={handleCreate}
                 >

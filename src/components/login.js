@@ -50,12 +50,13 @@ const useStylesGrid = makeStyles(theme => ({
     },
 }));
 
-export default function LoginPage() {
+export default function LoginPage(props) {
     const classesGrid = useStylesGrid();
     const { history } = useRouter();
 
     const responseGoogle = (response) => {
-        var finalData = { id: '1', username:'phuocnd', role: 'admin' }
+        console.log(response);
+        var finalData = { }
         
         axios({
             method: 'post',
@@ -66,7 +67,7 @@ export default function LoginPage() {
             },
             url: '/api_working/login',
             data: {
-                emp_code:'phuocnd'
+                emp_code: response.profileObj.email
             },
         })
         .then(function(response) {
@@ -81,10 +82,14 @@ export default function LoginPage() {
             }
         })
         .catch(function(xhr, ajaxOptions, thrownError) {
-            alert(xhr.status);
-            alert(thrownError);
+            alert("Not Found Employee");
         });
     }
+
+    const responseGoogleFail = (response) => {
+        console.log(response);
+    }
+
     return (
         <div className={classesGrid.root}>
             <Paper className={classesGrid.paper}>
@@ -97,10 +102,11 @@ export default function LoginPage() {
                 <Grid container spacing={2}>
                     <Grid item xs={8}>
                         <GoogleLogin
-                            clientId="" //CLIENTID NOT CREATED YET
+                        //{h3uvTv5d_VXc6uPoCRaaq1G7}
+                            clientId="91542920287-r66lr46326lshr3ma83ealobo5ddreov.apps.googleusercontent.com"
                             buttonText="Đăng nhập với google"
                             onSuccess={responseGoogle}
-                            onFailure={responseGoogle}
+                            onFailure={responseGoogleFail}
                         />
                     </Grid>
                 </Grid>
@@ -136,12 +142,4 @@ export default function LoginPage() {
             </Paper>
         </div>
     );
-
-    function login() {
-        const email = document.getElementById("user").value;
-        const password = document.getElementById("password").value;
-        console.log(email)
-        console.log(password)
-        history.push("/employees");
-    }
 }

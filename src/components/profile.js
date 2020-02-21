@@ -152,8 +152,9 @@ export default function Profile() {
     const queueRef = React.useRef([]);
     const [open, setOpen] = React.useState(true);
     const [clock, setClock] = React.useState(new Date().toLocaleString());
-    const [stateLockIn, setStateLockIn] = React.useState(true);
-    const [stateLockOut, setStateLockOut] = React.useState(true);
+    const [stateLock, setStateLock] = React.useState(
+        [false, false]
+    );
     const [user, setUser] = React.useState(
         {id: "1", username: "phuocnd", role: "admin"}
     );
@@ -183,11 +184,19 @@ export default function Profile() {
     });
 
     const clickClockIn = () => {
-        setStateLockIn(true);
+        axios.get(`/api_working/clockIn?id=` + user.id)
+            .then(res => {
+                window.location.reload(false);
+            })
+            .catch(error => console.log(error));
     }
 
     const clickClockOut = () => {
-        setStateLockOut(true);
+        axios.get(`/api_working/clockOut?id=` + user.id)
+            .then(res => {
+                window.location.reload(false);
+            })
+            .catch(error => console.log(error));
     }
 
     function tick() {
@@ -275,11 +284,18 @@ export default function Profile() {
             .then(res => {
                 var isChecked = res.data;
                 console.log(isChecked)
-                if (isChecked == 1){
-                    setStateLockIn(true);
-                }
-                else {
-                    setStateLockIn(false);
+                if (isChecked[0] == 1 ){
+                    if(isChecked[1] == 1){
+                        setStateLock(
+                            [true, true]
+                        );
+                    }
+                    else {
+                        setStateLock(
+                            [true, false]
+                        );
+                    }
+                    
                 }
             })
             .catch(error => console.log(error));
@@ -300,7 +316,8 @@ export default function Profile() {
                                 color="primary"
                                 className={classes.button}
                                 endIcon={<CheckCircleOutlineIcon clickClockIn />}
-                                disabled={stateLockIn}
+                                onClick={() => { clickClockIn() }}
+                                disabled={stateLock[0]}
                             >
                                 {'CLOCK-IN !!!'}
                             </Button>
@@ -309,7 +326,8 @@ export default function Profile() {
                                 color="secondary"
                                 className={classes.button}
                                 endIcon={<CheckCircleOutlineIcon clickClockOut />}
-                                disabled={stateLockIn}
+                                onClick={() => { clickClockOut() }}
+                                disabled={stateLock[1]}
                             >
                                 {'CLOCK-OUT !!!'}
                             </Button>
