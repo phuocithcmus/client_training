@@ -33,10 +33,10 @@ export function useRouter() {
 const useStylesBar = makeStyles(theme => ({
     root: {
         flexGrow: 1,
-        marginTop: 25,
+        marginTop: "5%",
         marginBottom: 25,
-        marginLeft: 35,
-        marginRight: 35,
+        marginLeft: "5%",
+        marginRight: "5%",
     },
     menuButton: {
         marginRight: theme.spacing(2),
@@ -51,17 +51,12 @@ const useStyles = makeStyles(theme => ({
         marginTop: 15,
         flexGrow: 1,
     },
-    paper: {
-
-        padding: theme.spacing(2),
-    },
 }));
 
 const useStylesGrid = makeStyles(theme => ({
     root: {
         flexGrow: 1,
         overflow: 'hidden',
-        marginTop: 35
     },
     paper: {
         marginTop: 10,
@@ -129,42 +124,6 @@ export default function Employee() {
 
     return (
         <div className={classesBar.root}>
-            {/* <AppBar position="static">
-                <Toolbar>
-                    <Typography variant="h6" className={classesBar.title}>
-                        Employee {id}
-                    </Typography>
-                    <div>
-                        <IconButton
-                            aria-label="account of current user"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            onClick={handleMenu}
-                            color="inherit"
-                        >
-                            <AccountCircle />
-                        </IconButton>
-                        <Menu
-                            id="menu-appbar"
-                            anchorEl={anchorEl}
-                            anchorOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            keepMounted
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            open={open}
-                            onClose={handleClose}
-                        >
-                            <MenuItem onClick={handleClose}>Profile</MenuItem>
-                            <MenuItem onClick={handleClose}>My account</MenuItem>
-                        </Menu>
-                    </div>
-                </Toolbar>
-            </AppBar> */}
             <div className={classesGrid.root}>
                 <Paper className={classesGrid.paper}>
                     <Grid container spacing={2}>

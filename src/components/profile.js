@@ -77,8 +77,8 @@ const useStylesGrid = makeStyles(theme => ({
     paper: {
         marginTop: 25,
         marginBottom: 10,
-        marginLeft: 35,
-        marginRight: 35,
+        marginLeft: "15%",
+        marginRight: "15%",
         padding: theme.spacing(2),
         border: '1px solid #BDBDBD',
         backgroundColor: '#F5F5F5',
@@ -295,22 +295,20 @@ export default function Profile() {
                             [true, false]
                         );
                     }
-                    
                 }
             })
             .catch(error => console.log(error));
     })  
 
     return (
-        <div className={classes.root}>
             <div className={classesGrid.root}>
                 <Paper className={classesGrid.paper}>
                     <Grid container spacing={2}>
-                        <Grid className={classesGrid.clock} item xs={3}>
+                        <Grid className={classesGrid.clock} item xs={4}>
                             <BellIcon width='50' height="50" active={true} animate={true} color='#4caf50' />
                             <span> </span>{clock}
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={4}>
                             <Button
                                 variant="contained"
                                 color="primary"
@@ -396,6 +394,5 @@ export default function Profile() {
                     </Grid>
                 </Paper>
             </div>
-        </div>
     );
 }

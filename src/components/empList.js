@@ -211,7 +211,7 @@ export default function Employees() {
     const [opa, setOpacity] = React.useState(1);
 
     React.useEffect(() => {
-        axios.get(`http://0.0.0.0:9001/api/employees`)
+        axios.get(`/api/employees`)
             .then(res => {
                 const data_emps = res.data;
                 console.log(data_emps);

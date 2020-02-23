@@ -62,15 +62,11 @@ const useStylesGrid = makeStyles(theme => ({
         overflow: 'hidden',
     },
     paper: {
-        //   maxWidth: 400,
-        //   margin: `${theme.spacing(1)}px auto`,
         marginTop: '5%',
-        marginBottom: 20,
-        marginLeft: '25%',
-        marginRight: '25%',
+        marginLeft: '30%',
+        marginRight: '30%',
         padding: theme.spacing(2),
         border: '1px solid #BDBDBD',
-        // backgroundColor: '#F5F5F5',
     },
     gridItem: {
         marginTop: 20,
@@ -228,44 +224,6 @@ export default function CreateEmployee() {
     }, [])
 
     return (
-        <div className={classesBar.root}>
-            {/* <AppBar position="static">
-                <Toolbar>
-                    <Typography variant="h6" className={classesBar.title}>
-                        Employee title
-                    </Typography>
-                    <div>
-                        <IconButton
-                            aria-label="account of current user"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            onClick={handleMenu}
-                            color="inherit"
-                        >
-                            <AccountCircle />
-                        </IconButton>
-                        <Menu
-                            id="menu-appbar"
-                            anchorEl={anchorEl}
-                            anchorOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            keepMounted
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            open={open}
-                            onClose={handleClose}
-                        >
-                            <MenuItem onClick={handleClose}>Profile</MenuItem>
-                            <MenuItem onClick={handleClose}>My account</MenuItem>
-                        </Menu>
-                    </div>
-                </Toolbar>
-            </AppBar> */}
-
             <div className={classesGrid.root}>
                 <Paper className={classesGrid.paper}>
                     <Grid container spacing={2}>
@@ -275,6 +233,11 @@ export default function CreateEmployee() {
                     </Grid>
                     <hr />
                     <br />
+                    <Grid container spacing={2}>
+                        <Grid item>
+                            <div style={{fontSize: '25px', color: '#34495e'}}><b>Tài khoản</b></div>
+                        </Grid>
+                    </Grid>
                     <Grid container spacing={4}>
                         <Grid item xs={6}>
                             <TextField className={classesGrid.textfield} fullWidth id="username" label="Tên tài khoản" variant="outlined" InputProps={{
@@ -289,20 +252,16 @@ export default function CreateEmployee() {
                                     <CompassCalibrationIcon />
                                 ),
                             }} /> */}
-
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="role"
-                                value={roleOption}
-                                onChange={handleChangeRole}
-                            >
-                                <MenuItem value={'1'}>Admin</MenuItem>
-                                <MenuItem value={'0'}>User</MenuItem>
-                            </Select>
+                            <div style={{fontSize: '18px', color: 'red'}}><b>Nhập username có dạng: "emp_code" + @gmail.com</b></div>
                         </Grid>
                     </Grid>
                     <hr />
                     <br />
+                    <Grid container spacing={2}>
+                        <Grid item>
+                            <div style={{fontSize: '25px', color: '#34495e'}}><b>Thông tin nhân viên</b></div>
+                        </Grid>
+                    </Grid>
                     <Grid container spacing={4}>
                         <Grid item xs={6}>
                             <TextField className={classesGrid.textfield} id="name" label="Họ tên" variant="outlined" InputProps={{
@@ -328,8 +287,7 @@ export default function CreateEmployee() {
                             }} />
                         </Grid>
                         <Grid item xs={6}>
-                            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                                <Grid container justify="space-around">
+                            <MuiPickersUtilsProvider style={{}} utils={DateFnsUtils}>
                                     <KeyboardDatePicker className={classesGrid.textfield}
                                         disableToolbar
                                         variant="inline"
@@ -343,23 +301,23 @@ export default function CreateEmployee() {
                                             'aria-label': 'change date',
                                         }}
                                     />
-                                </Grid>
+                                
                             </MuiPickersUtilsProvider>
                         </Grid>
                     </Grid>
-                    <Grid container spacing={2}>
-                        <Grid item xs={3}>
+                    <Grid container spacing={4}>
+                        <Grid item xs={6}>
                             <TextField className={classesGrid.textfield} id="identification_card" label="CMND" variant="outlined" InputProps={{
                                 endAdornment: (
                                     <FingerprintIcon />
                                 ),
                             }} />
                         </Grid>
-                        <Grid item xs={3}>
-                            <FormControl className={classesGrid.textfield}>
+                        <Grid item xs={6}>
+                            <FormControl variant="outlined" className={classesGrid.textfield}>
                                 <InputLabel id="demo-simple-select-label">Giới tính</InputLabel>
                                 <Select
-                                    labelId="demo-simple-select-label"
+                                    labelId="demo-simple-select-filled-label"
                                     id="gender"
                                     value={genderOption}
                                     onChange={handleChangeGender}
@@ -371,10 +329,13 @@ export default function CreateEmployee() {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={3}>
-                            <FormControl className={classesGrid.textfield}>
+                    </Grid>
+                    <Grid container spacing={4}>
+                    <Grid item xs={6}>
+                            <FormControl variant="outlined" className={classesGrid.textfield}>
                                 <InputLabel id="demo-simple-select-label">Phòng</InputLabel>
                                 <Select
+                                
                                     id="department"
                                     value={departmentOption}
                                     onChange={handleChangeDepartment}
@@ -389,8 +350,8 @@ export default function CreateEmployee() {
                             </FormControl>
                         </Grid>
 
-                        <Grid item xs={3}>
-                            <FormControl className={classesGrid.textfield}>
+                        <Grid item xs={6}>
+                            <FormControl variant="outlined" className={classesGrid.textfield}>
                                 <InputLabel id="demo-simple-select-label">Chức vụ</InputLabel>
                                 <Select
                                     labelId="demo-simple-select-label"
@@ -407,10 +368,10 @@ export default function CreateEmployee() {
                                 </Select>
                             </FormControl>
                         </Grid>
-                    </Grid>
+                        </Grid>
                     <Grid container spacing={4}>
-                        <Grid item xs={3}>
-                            <FormControl className={classesGrid.textfield}>
+                        <Grid item xs={6}>
+                            <FormControl variant="outlined" className={classesGrid.textfield}>
                                 <InputLabel id="demo-simple-select-label">Người quản lý</InputLabel>
                                 <Select
                                     id="manager"
@@ -426,17 +387,32 @@ export default function CreateEmployee() {
                                 </Select>
                             </FormControl>
                         </Grid>
+                        <Grid item xs={6}>
+                        <FormControl variant="outlined" className={classesGrid.textfield}>
+                                <InputLabel id="demo-simple-select-label">Vai trò</InputLabel>
+                                <Select
+                                variant="outlined" 
+                                labelId="demo-simple-select-label"
+                                id="role"
+                                value={roleOption}
+                                onChange={handleChangeRole}
+                            >
+                                <MenuItem value={'1'}>Admin</MenuItem>
+                                <MenuItem value={'0'}>User</MenuItem>
+                            </Select>
+                            </FormControl>
+                            </Grid>
                     </Grid>
-
+                    <br />
+                    <hr />
                     <Grid container spacing={4}>
-                        <Grid item>
-                            <Button style={{ width: '150px' }} size="medium" variant="contained" color="primary" onClick={() => { handlerCreateEmp() }}>
+                        <Grid item xs={12}>
+                            <Button style={{width: "100%",height: "100%", textAlign: 'center', fontSize: '20px'}}variant="contained" color="primary" onClick={() => { handlerCreateEmp() }}>
                                 Tạo
                                 </Button>
                         </Grid>
                     </Grid>
                 </Paper>
             </div>
-        </div>
     );
 }
