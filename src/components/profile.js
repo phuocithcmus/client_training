@@ -33,7 +33,25 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { Chart } from 'react-charts'
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import HttpsIcon from '@material-ui/icons/Https';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import axios from 'axios';
+import PrimarySearchAppBar from './header'
+import Drawer from '@material-ui/core/Drawer';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import List from '@material-ui/core/List';
+import Divider from '@material-ui/core/Divider';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import InboxIcon from '@material-ui/icons/MoveToInbox';
+import ListIcon from '@material-ui/icons/List';
+import PersonIcon from '@material-ui/icons/Person';
+import DetailsIcon from '@material-ui/icons/Details';
+import AddBoxIcon from '@material-ui/icons/AddBox';
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
 
 const useStyles = makeStyles(theme => ({
     close: {
@@ -67,17 +85,62 @@ const useStyles = makeStyles(theme => ({
     button: {
         margin: theme.spacing(1),
     },
+    modal: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    paper: {
+        backgroundColor: theme.palette.background.paper,
+        border: '2px solid #000',
+        boxShadow: theme.shadows[5],
+        padding: theme.spacing(2, 4, 3),
+        overflow: 'auto',
+        height: '25%'
+    },
+}));
+
+const drawerWidth = 240;
+const useStylesSide = makeStyles(theme => ({
+    root: {
+        display: 'flex',
+    },
+    appBar: {
+        width: `calc(100% - ${drawerWidth}px)`,
+        marginLeft: drawerWidth,
+    },
+    drawer: {
+        width: drawerWidth,
+        flexShrink: 0,
+    },
+    drawerPaper: {
+        width: drawerWidth,
+    },
+    toolbar: theme.mixins.toolbar,
+    content: {
+        flexGrow: 1,
+        backgroundColor: theme.palette.background.default,
+        padding: theme.spacing(3),
+    },
+}));
+
+const useStylesBar = makeStyles(theme => ({
+    root: {
+        display: 'flex',
+    },
 }));
 
 const useStylesGrid = makeStyles(theme => ({
     root: {
         flexGrow: 1,
         overflow: 'hidden',
+        marginTop: '5%',
+        marginLeft: '-15%',
     },
     paper: {
         marginTop: 25,
         marginBottom: 10,
-        marginLeft: "15%",
+        // marginLeft: "15%",
         marginRight: "15%",
         padding: theme.spacing(2),
         border: '1px solid #BDBDBD',
@@ -86,13 +149,12 @@ const useStylesGrid = makeStyles(theme => ({
     title: {
         fontWeight: 'bold',
         fontSize: '24px',
-        fontFamily: 'Roboto',
         color: '#34495e',
+        marginBottom: '10px'
     },
     nameField: {
         fontWeight: 'bold',
         fontSize: '16px',
-        fontFamily: 'Roboto',
         color: '#34495e',
     },
     clock: {
@@ -100,6 +162,24 @@ const useStylesGrid = makeStyles(theme => ({
         fontSize: '32px',
         color: '#34495e',
     },
+    timeCheck: {
+        fontWeight: 'bold',
+        fontSize: '24px',
+        color: '#34495e',
+        textAlign: 'left',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        verticalAlign: 'middle',
+    },
+    logo: {
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        verticalAlign: 'middle',
+        width: '100%',
+        height: '100%'
+    }
 }));
 
 const working_emp = {
@@ -130,6 +210,10 @@ function countOffDaySuitable(year, month) {
     return new Date(year, month, 0).getDate() - counter;
 }
 
+export function useRouter() {
+    return useContext(RouterContext);
+}
+
 function countOffDaySuitableToCurrentDate(year, month, current_date) {
     var day, counter, date;
 
@@ -144,23 +228,40 @@ function countOffDaySuitableToCurrentDate(year, month, current_date) {
         date = new Date(year, month, day);
     }
 
-
     return new Date(year, month, current_date).getDate() - counter;
 }
 
 export default function Profile() {
     const queueRef = React.useRef([]);
-    const [open, setOpen] = React.useState(true);
+    const [open, setOpen] = React.useState(false);
     const [clock, setClock] = React.useState(new Date().toLocaleString());
     const [stateLock, setStateLock] = React.useState(
         [false, false]
     );
-    const [user, setUser] = React.useState(
-        {id: "1", username: "phuocnd", role: "admin"}
+    const [workingTime, setWorkingTime] = React.useState(
+        [
+            {
+
+            },
+        ]
     );
+    const { history } = useRouter();
+    const [user, setUser] = React.useState(
+        { id: "1", username: "phuocnd", role: "admin" }
+    );
+    const time_checked = {
+        time_in: '',
+        time_out: '',
+        mark: ''
+    }
+
+    const [timeChecked, setTimeChecked] = React.useState(time_checked);
     const [emp, setEmp] = React.useState({});
     const classes = useStyles();
+    const classesBar = useStylesBar();
     const classesGrid = useStylesGrid();
+    const classesSide = useStylesSide();
+
     const [dataWorkingHours, setDataWorkingHours] = React.useState(
         {
             label: 'Working hours',
@@ -188,7 +289,9 @@ export default function Profile() {
             .then(res => {
                 window.location.reload(false);
             })
-            .catch(error => console.log(error));
+            .catch(error => {
+                history.push('/404');
+            });
     }
 
     const clickClockOut = () => {
@@ -196,11 +299,40 @@ export default function Profile() {
             .then(res => {
                 window.location.reload(false);
             })
-            .catch(error => console.log(error));
+            .catch(error => {
+                history.push('/404');
+            });
     }
 
+    const clickDetail = () => {
+        setOpen(true);
+        axios.get(`/api_working/working_time?id=` + user.id)
+            .then(res => {
+                setWorkingTime(res.data);
+                console.log(res.data);
+            })
+            .catch(error => {
+                history.push('/404');
+            });
+    }
+
+    const logout = () => {
+        window.sessionStorage.clear();
+        history.push("/home")
+    }
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
     function tick() {
-        setClock(new Date().toLocaleString());
+        let current_datetime = new Date();
+        setClock(current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + " " + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds()
+        );
     }
 
     const data = [
@@ -232,12 +364,14 @@ export default function Profile() {
                 const data_emps = res.data;
                 setEmp(data_emps);
             })
-            .catch(error => console.log(error));
+            .catch(error => {
+                history.push('/404');
+            });
     }, [])
 
     React.useEffect(() => {
         var d = new Date();
-        axios.get(`/api_working/number_hour_off?id=`+ user.id + '&date_month=' + d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate())
+        axios.get(`/api_working/number_hour_off?id=` + user.id + '&date_month=' + d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate())
             .then(res => {
                 var month = 0;
                 var date = new Date(d.getFullYear(), month, 1);
@@ -256,7 +390,9 @@ export default function Profile() {
                     }
                 }
             })
-            .catch(error => console.log(error));
+            .catch(error => {
+                history.push('/404');
+            });
     })
 
     React.useEffect(() => {
@@ -280,12 +416,12 @@ export default function Profile() {
     })
 
     React.useEffect(() => {
-        axios.get(`/api_working/isChecked?id=`+ user.id)
+        axios.get(`/api_working/isChecked?id=` + user.id)
             .then(res => {
                 var isChecked = res.data;
                 console.log(isChecked)
-                if (isChecked[0] == 1 ){
-                    if(isChecked[1] == 1){
+                if (isChecked[0] == 1) {
+                    if (isChecked[1] == 1) {
                         setStateLock(
                             [true, true]
                         );
@@ -297,18 +433,54 @@ export default function Profile() {
                     }
                 }
             })
-            .catch(error => console.log(error));
-    })  
+            .catch(error => {
+                history.push('/404');
+            });
+    }, [])
+
+    React.useEffect(() => {
+        axios.get(`/api_working/timeChecked?id=` + user.id)
+            .then(res => {
+                var time = res.data;
+                console.log(time)
+                setTimeChecked(
+                    {
+                        time_in: time[0],
+                        time_out: time[1],
+                        mark: time[2]
+                    }
+                )
+            })
+            .catch(error => {
+                history.push('/404');
+            });
+    }, [])
 
     return (
+        <div className={classesBar.root}>
+            <PrimarySearchAppBar username={JSON.parse(window.sessionStorage.getItem("user")).emp_code} drawerWidth={0} />
+            {/* <Drawer
+                className={classesSide.drawer}
+                variant="permanent"
+                classes={{
+                    paper: classesSide.drawerPaper,
+                }}
+                anchor="left"
+            >
+
+                <div className={classesSide.toolbar} />
+                <Divider />
+                <List>
+                </List>
+            </Drawer> */}
             <div className={classesGrid.root}>
                 <Paper className={classesGrid.paper}>
                     <Grid container spacing={2}>
-                        <Grid className={classesGrid.clock} item xs={4}>
+                        {/* <Grid className={classesGrid.clock} item xs={4}>
                             <BellIcon width='50' height="50" active={true} animate={true} color='#4caf50' />
-                            <span> </span>{clock}
-                        </Grid>
-                        <Grid item xs={4}>
+                            {clock}
+                        </Grid> */}
+                        <Grid item xs={2}>
                             <Button
                                 variant="contained"
                                 color="primary"
@@ -317,8 +489,18 @@ export default function Profile() {
                                 onClick={() => { clickClockIn() }}
                                 disabled={stateLock[0]}
                             >
-                                {'CLOCK-IN !!!'}
+                                {'CLOCK-IN!!!'}
                             </Button>
+                        </Grid>
+                        <Grid className={classesGrid.timeCheck} item xs={3}>
+                            {timeChecked.time_in != '' && (
+                                <div className={classesGrid.timeCheck} ><HttpsIcon width='50' height="50" />: {timeChecked.time_in}</div>
+                            )}
+                            {timeChecked.time_in == '' && (
+                                <div className={classesGrid.timeCheck} >{clock}</div>
+                            )}
+                        </Grid>
+                        <Grid className={classesGrid.timeCheck} item xs={2}>
                             <Button
                                 variant="contained"
                                 color="secondary"
@@ -327,11 +509,82 @@ export default function Profile() {
                                 onClick={() => { clickClockOut() }}
                                 disabled={stateLock[1]}
                             >
-                                {'CLOCK-OUT !!!'}
+                                {'CLOCK-OUT!!!'}
                             </Button>
                         </Grid>
+                        <Grid className={classesGrid.timeCheck} item xs={3}>
+                            {/* <br/> */}
+                            {timeChecked.time_out != '' && (
+                                <div className={classesGrid.timeCheck} ><LockOpenIcon width='50' height="50" />: {timeChecked.time_out} </div>
+                            )}
+                            {timeChecked.time_out == '' && timeChecked.time_in != '' && (
+                                <div className={classesGrid.timeCheck} >{clock}</div>
+                            )}
+                        </Grid>
+                        <Grid className={classesGrid.timeCheck} item xs={2}>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                className={classes.button}
+                                endIcon={<DetailsIcon clickDetail />}
+                                onClick={() => { clickDetail() }}
+                            >
+                                {'DETAILS'}
+                            </Button>
+                        </Grid>
+                        <Modal
+                            aria-labelledby="transition-modal-title"
+                            aria-describedby="transition-modal-description"
+                            className={classes.modal}
+                            open={open}
+                            onClose={handleClose}
+                            closeAfterTransition
+                            BackdropComponent={Backdrop}
+                            BackdropProps={{
+                                timeout: 500,
+                            }}
+                        >
+                            <div className={classes.paper}>
+                                <TableContainer component={Paper}>
+                                    <Table aria-label="simple table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell style={{fontWeight: 'bold', backgroundColor: '#3f51b5', color: 'white'}}>TIME IN</TableCell>
+                                                <TableCell style={{fontWeight: 'bold', backgroundColor: '#3f51b5', color: 'white'}}>TIME OUT</TableCell>
+                                                <TableCell style={{fontWeight: 'bold', backgroundColor: '#3f51b5', color: 'white'}}>NOTE</TableCell>
+                                                <TableCell style={{fontWeight: 'bold', backgroundColor: '#3f51b5', color: 'white'}}>HOURS</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            { workingTime.map(row => (
+                                                <TableRow key={row.name}>
+                                                    <TableCell style={{fontWeight: 'bold'}}>
+                                                        {row.time_in}
+                                                    </TableCell >
+                                                    <TableCell style={{fontWeight: 'bold'}}>{row.time_out}</TableCell>
+                                                    <TableCell style={{fontWeight: 'bold'}}>{row.mark}</TableCell>
+                                                    <TableCell style={{fontWeight: 'bold'}}>{row.time}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                            {/* {workingTime.size == 0 && (
+                                                <div>abcxyz</div>
+                                            )} */}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </div>
+                        </Modal>
+                        {/* <Grid className={classesGrid.timeCheck} item xs={1}>
+                            <Button
+                                style={{ backgroundColor: 'rgba(0, 0, 0, 0.12)' }}
+                                className={classes.button}
+                                endIcon={<ExitToAppIcon logout />}
+                                onClick={() => { logout() }}
+                            >
+                                {'Log out'}
+                            </Button>
+                        </Grid> */}
                     </Grid>
-
                 </Paper>
                 <Paper className={classesGrid.paper}>
                     <Grid container spacing={2}>
@@ -394,5 +647,6 @@ export default function Profile() {
                     </Grid>
                 </Paper>
             </div>
+        </div>
     );
 }

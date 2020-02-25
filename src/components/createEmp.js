@@ -36,6 +36,20 @@ import Select from '@material-ui/core/Select';
 import axios from 'axios';
 import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
 import moment from 'moment';
+import PrimarySearchAppBar from './header'
+import { tr } from 'date-fns/esm/locale';
+import Drawer from '@material-ui/core/Drawer';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import List from '@material-ui/core/List';
+import Divider from '@material-ui/core/Divider';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import InboxIcon from '@material-ui/icons/MoveToInbox';
+import MailIcon from '@material-ui/icons/Mail';
+import ListIcon from '@material-ui/icons/List';
+import PersonIcon from '@material-ui/icons/Person';
+import AddBoxIcon from '@material-ui/icons/AddBox';
 
 export function useRouter() {
     return useContext(RouterContext);
@@ -44,9 +58,7 @@ export function useRouter() {
 const useStylesBar = makeStyles(theme => ({
     root: {
         flexGrow: 1,
-        marginLeft: 25,
-        marginRight: 25,
-        marginTop: 10
+        display: 'flex',
     },
     menuButton: {
         marginRight: theme.spacing(2),
@@ -60,11 +72,12 @@ const useStylesGrid = makeStyles(theme => ({
     root: {
         flexGrow: 1,
         overflow: 'hidden',
+        display: 'flex',
     },
     paper: {
         marginTop: '5%',
-        marginLeft: '30%',
-        marginRight: '30%',
+        marginLeft: '25%',
+        marginRight: '25%',
         padding: theme.spacing(2),
         border: '1px solid #BDBDBD',
     },
@@ -84,14 +97,56 @@ const useStylesGrid = makeStyles(theme => ({
     },
 }));
 
+const drawerWidth = 240;
+const useStylesSide = makeStyles(theme => ({
+    root: {
+      display: 'flex',
+    },
+    appBar: {
+      width: `calc(100% - ${drawerWidth}px)`,
+      marginLeft: drawerWidth,
+    },
+    drawer: {
+      width: drawerWidth,
+      flexShrink: 0,
+    },
+    drawerPaper: {
+      width: drawerWidth,
+    },
+    toolbar: theme.mixins.toolbar,
+    content: {
+      flexGrow: 1,
+      backgroundColor: theme.palette.background.default,
+      padding: theme.spacing(3),
+    },
+  }));
+
 export default function CreateEmployee() {
     const classesBar = useStylesBar();
+    const classesSide = useStylesSide();
     const { history } = useRouter();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     let { id } = useParams();
     const classesGrid = useStylesGrid();
     const [gender, setGender] = React.useState('');
+    const msgICard = 'CMND must have at least 9 characters and digits';
+    const msgPhone = 'Phone number must have at least 10 characters and digits';
+    const msgUsername = 'Username must correct with pattern';
+    const [error, setError] = React.useState({
+        icard: {
+            isError: false,
+            msg: ''
+        },
+        phone: {
+            isError: false,
+            msg: ''
+        },
+        username: {
+            isError: false,
+            msg: ''
+        }
+    });
     // The first commit of Material-UI
     const [selectedDate, setSelectedDate] = React.useState(new Date());
 
@@ -105,6 +160,7 @@ export default function CreateEmployee() {
     const [birthdayOption, setbirthdayOption] = React.useState(moment(new Date()).format('YYYY-MM-DD'));
     const [roleOption, setRoleOption] = React.useState(0);
     const [mngOption, setMngOption] = React.useState([]);
+    const [auth, setAuth] = React.useState(false);
 
     const handleMenu = event => {
         setAnchorEl(event.currentTarget);
@@ -133,7 +189,9 @@ export default function CreateEmployee() {
                 console.log(data);
                 setManager(data);
             })
-            .catch(error => console.log(error));
+            .catch(error => {
+                history.push('/404');
+            });
     };
 
     const handleChangeTitle = event => {
@@ -146,6 +204,21 @@ export default function CreateEmployee() {
 
     const handleChangeMng = event => {
         setMngOption(event.target.value);
+    };
+
+    const checkEmail = (username) => {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(username).toLowerCase());
+    };
+
+    const checkICard = (icard) => {
+        var re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{3}$/im
+        return re.test(String(icard).toLowerCase());
+    };
+
+    const checkPhoneNumber = (phoneNumber) => {
+        var re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im
+        return re.test(String(phoneNumber).toLowerCase());
     };
 
     const handlerCreateEmp = () => {
@@ -165,47 +238,120 @@ export default function CreateEmployee() {
             emp_mng: mngOption,
         }
 
-        console.log(emp);
-        axios({
-            method: 'post',
-            headers: {    
-                'crossDomain': true,
-                //'Content-Type': 'application/json',
-                'Content-Type': 'text/plain;charset=utf-8',
-            },
-            url: '/api/employees/create',
-            data: emp,
-        })
-        .then(function(response) {
-            var data = response.data;
-            console.log(data);
-            //if login token works then get records
-        })
-        .catch(function(xhr, ajaxOptions, thrownError) {
-            alert(xhr.status);
-            alert(thrownError);
-        });
-        // axios.post(`http://0.0.0.0:9001/api/employees/create`, emp ,
-        //     {
-        //         headers: {
-        //         'Content-Type': 'application/x-www-form-urlencoded',
-        //         'Access-Control-Allow-Origin': '*',
-        //         "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
-        //         "Access-Control-Allow-Headers": "Origin, Content-Type, X-Auth-Token"
-        //     },
-        //     responseType: 'json',
-        // })
-        //     .then(res => {
-        //         const isSuccess = res.data;
-        //         console.log(isSuccess);
-        //         // setLoading(false);
-        //         // setOpacity(1);
-        //         window.location.reload(false);
-        //     })
-        //     .catch(error => console.log(error));
+        if (!checkEmail(emp.emp_code)) {
+            setError(
+                {
+                    icard: {
+                        isError: error.icard.isError,
+                        msg: error.icard.msg
+                    },
+                    phone: {
+                        isError: error.phone.isError,
+                        msg: error.phone.msg
+                    },
+                    username: {
+                        isError: true,
+                        msg: msgUsername,
+                    }
+                }
+            );
+        }
+
+        if (!checkICard(emp.identification_card)) {
+            setError(
+                {
+                    icard: {
+                        isError: true,
+                        msg: msgICard
+                    },
+                    phone: {
+                        isError: error.phone.isError,
+                        msg: error.phone.msg
+                    },
+                    username: {
+                        isError: error.username.isError,
+                        msg: error.username.msg
+                    }
+                }
+            );
+        }
+
+        if (!checkPhoneNumber(emp.phone_number)) {
+            setError(
+                {
+                    icard: {
+                        isError: error.icard.isError,
+                        msg: error.icard.msg
+                    },
+                    phone: {
+                        isError: true,
+                        msg: msgPhone
+                    },
+                    username: {
+                        isError: error.username.isError,
+                        msg: error.username.msg
+                    }
+                }
+            );
+        }
+
+        if (!checkEmail(emp.emp_code) || !checkICard(emp.identification_card) || !checkPhoneNumber(emp.phone_number)) {
+            return;
+        }
+        else {
+            setError(
+                {
+                    icard: {
+                        isError: false,
+                        msg: ''
+                    },
+                    phone: {
+                        isError: false,
+                        msg: ''
+                    },
+                    username: {
+                        isError: false,
+                        msg: ''
+                    }
+                }
+            );
+            console.log(emp);
+            axios({
+                method: 'post',
+                headers: {
+                    'crossDomain': true,
+                    //'Content-Type': 'application/json',
+                    'Content-Type': 'text/plain;charset=utf-8',
+                },
+                url: '/api/employees/create',
+                data: emp,
+            })
+                .then(function (response) {
+                    var data = response.data;
+                    console.log(data);
+                    history.push('/employees')
+                    //if login token works then get records
+                })
+                .catch(function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(thrownError);
+                });
+        }
     }
 
     React.useEffect(() => {
+        if(JSON.parse(window.sessionStorage.getItem("user")) != null){
+            var auth_check = JSON.parse(window.sessionStorage.getItem("user")).role;
+            if (auth_check == 1) {
+                setAuth(true);
+            }
+            else {
+                history.push('/404');
+            }
+        }
+        else {
+            history.push('/404');
+        }
         axios.get(`/api/department`)
             .then(res => {
                 const data = res.data;
@@ -224,23 +370,47 @@ export default function CreateEmployee() {
     }, [])
 
     return (
+        <div className={classesBar.root}>
             <div className={classesGrid.root}>
+            <PrimarySearchAppBar username={JSON.parse(window.sessionStorage.getItem("user")).emp_code} drawerWidth={240}/>
+                <Drawer
+                    className={classesSide.drawer}
+                    variant="permanent"
+                    classes={{
+                        paper: classesSide.drawerPaper,
+                    }}
+                    anchor="left"
+                >
+                    <div className={classesSide.toolbar} />
+                    <Divider />
+                    <List>
+                       
+                            <ListItem button onClick={() => {history.push('/employees')}} key='List Employee'>
+                                <ListItemIcon><ListIcon/></ListItemIcon>
+                                <ListItemText primary='List Employee' />
+                            </ListItem>
+                            <ListItem button onClick={() => {history.push('/employee/create')}} key='Create Employee'>
+                                <ListItemIcon><AddBoxIcon/></ListItemIcon>
+                                <ListItemText primary='Create Employee' />
+                            </ListItem>
+                    </List>
+                </Drawer>
                 <Paper className={classesGrid.paper}>
                     <Grid container spacing={2}>
                         <Grid item>
-                            <div className={classesGrid.title}>Tạo tài khoản nhân viên</div>
+                            <div className={classesGrid.title}>Create Account</div>
                         </Grid>
                     </Grid>
                     <hr />
                     <br />
                     <Grid container spacing={2}>
                         <Grid item>
-                            <div style={{fontSize: '25px', color: '#34495e'}}><b>Tài khoản</b></div>
+                            <div style={{ fontSize: '25px', color: '#34495e' }}><b>Account</b></div>
                         </Grid>
                     </Grid>
                     <Grid container spacing={4}>
                         <Grid item xs={6}>
-                            <TextField className={classesGrid.textfield} fullWidth id="username" label="Tên tài khoản" variant="outlined" InputProps={{
+                            <TextField error={error.username.isError} helperText={error.username.msg} className={classesGrid.textfield} className={classesGrid.textfield} fullWidth id="username" label="Username" variant="outlined" InputProps={{
                                 endAdornment: (
                                     <AccountCircle />
                                 ),
@@ -252,26 +422,26 @@ export default function CreateEmployee() {
                                     <CompassCalibrationIcon />
                                 ),
                             }} /> */}
-                            <div style={{fontSize: '18px', color: 'red'}}><b>Nhập username có dạng: "emp_code" + @gmail.com</b></div>
+                            <div style={{ fontSize: '18px', color: 'red' }}><b>Type username with format: "emp_code" + @example.com</b></div>
                         </Grid>
                     </Grid>
                     <hr />
                     <br />
                     <Grid container spacing={2}>
                         <Grid item>
-                            <div style={{fontSize: '25px', color: '#34495e'}}><b>Thông tin nhân viên</b></div>
+                            <div style={{ fontSize: '25px', color: '#34495e' }}><b>Employee Information</b></div>
                         </Grid>
                     </Grid>
                     <Grid container spacing={4}>
                         <Grid item xs={6}>
-                            <TextField className={classesGrid.textfield} id="name" label="Họ tên" variant="outlined" InputProps={{
+                            <TextField className={classesGrid.textfield} id="name" label="Name" variant="outlined" InputProps={{
                                 endAdornment: (
                                     <AccountBoxIcon />
                                 ),
                             }} />
                         </Grid>
                         <Grid item xs={6}>
-                            <TextField className={classesGrid.textfield} id="phoneNumber" label="Số điện thoại" variant="outlined" InputProps={{
+                            <TextField error={error.phone.isError} helperText={error.phone.msg} className={classesGrid.textfield} id="phoneNumber" label="Phone Number" variant="outlined" InputProps={{
                                 endAdornment: (
                                     <PhoneIcon />
                                 ),
@@ -280,7 +450,7 @@ export default function CreateEmployee() {
                     </Grid>
                     <Grid container spacing={4}>
                         <Grid item xs={6}>
-                            <TextField className={classesGrid.textfield} id="address" label="Địa chỉ" variant="outlined" InputProps={{
+                            <TextField className={classesGrid.textfield} id="address" label="Address" variant="outlined" InputProps={{
                                 endAdornment: (
                                     <ContactsIcon />
                                 ),
@@ -288,26 +458,25 @@ export default function CreateEmployee() {
                         </Grid>
                         <Grid item xs={6}>
                             <MuiPickersUtilsProvider style={{}} utils={DateFnsUtils}>
-                                    <KeyboardDatePicker className={classesGrid.textfield}
-                                        disableToolbar
-                                        variant="inline"
-                                        format="MM/dd/yyyy"
-                                        margin="normal"
-                                        id="dob"
-                                        label="Ngày sinh"
-                                        value={birthdayOption}
-                                        onChange={handleDateChange}
-                                        KeyboardButtonProps={{
-                                            'aria-label': 'change date',
-                                        }}
-                                    />
-                                
+                                <KeyboardDatePicker className={classesGrid.textfield}
+                                    disableToolbar
+                                    variant="inline"
+                                    format="MM/dd/yyyy"
+                                    margin="normal"
+                                    id="dob"
+                                    label="Date Of Birth"
+                                    value={birthdayOption}
+                                    onChange={handleDateChange}
+                                    KeyboardButtonProps={{
+                                        'aria-label': 'change date',
+                                    }}
+                                />
                             </MuiPickersUtilsProvider>
                         </Grid>
                     </Grid>
                     <Grid container spacing={4}>
                         <Grid item xs={6}>
-                            <TextField className={classesGrid.textfield} id="identification_card" label="CMND" variant="outlined" InputProps={{
+                            <TextField error={error.icard.isError} className={classesGrid.textfield} id="identification_card" label="Identification Card" variant="outlined" helperText={error.icard.msg} InputProps={{
                                 endAdornment: (
                                     <FingerprintIcon />
                                 ),
@@ -315,7 +484,7 @@ export default function CreateEmployee() {
                         </Grid>
                         <Grid item xs={6}>
                             <FormControl variant="outlined" className={classesGrid.textfield}>
-                                <InputLabel id="demo-simple-select-label">Giới tính</InputLabel>
+                                <InputLabel id="demo-simple-select-label">Gender</InputLabel>
                                 <Select
                                     labelId="demo-simple-select-filled-label"
                                     id="gender"
@@ -331,11 +500,11 @@ export default function CreateEmployee() {
                         </Grid>
                     </Grid>
                     <Grid container spacing={4}>
-                    <Grid item xs={6}>
+                        <Grid item xs={6}>
                             <FormControl variant="outlined" className={classesGrid.textfield}>
-                                <InputLabel id="demo-simple-select-label">Phòng</InputLabel>
+                                <InputLabel id="demo-simple-select-label">Department</InputLabel>
                                 <Select
-                                
+
                                     id="department"
                                     value={departmentOption}
                                     onChange={handleChangeDepartment}
@@ -352,7 +521,7 @@ export default function CreateEmployee() {
 
                         <Grid item xs={6}>
                             <FormControl variant="outlined" className={classesGrid.textfield}>
-                                <InputLabel id="demo-simple-select-label">Chức vụ</InputLabel>
+                                <InputLabel id="demo-simple-select-label">Title</InputLabel>
                                 <Select
                                     labelId="demo-simple-select-label"
                                     id="title"
@@ -368,11 +537,11 @@ export default function CreateEmployee() {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        </Grid>
+                    </Grid>
                     <Grid container spacing={4}>
                         <Grid item xs={6}>
                             <FormControl variant="outlined" className={classesGrid.textfield}>
-                                <InputLabel id="demo-simple-select-label">Người quản lý</InputLabel>
+                                <InputLabel id="demo-simple-select-label">Manager</InputLabel>
                                 <Select
                                     id="manager"
                                     value={mngOption}
@@ -387,32 +556,33 @@ export default function CreateEmployee() {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={6}>
-                        <FormControl variant="outlined" className={classesGrid.textfield}>
+                        {/* <Grid item xs={6}>
+                            <FormControl variant="outlined" className={classesGrid.textfield}>
                                 <InputLabel id="demo-simple-select-label">Vai trò</InputLabel>
                                 <Select
-                                variant="outlined" 
-                                labelId="demo-simple-select-label"
-                                id="role"
-                                value={roleOption}
-                                onChange={handleChangeRole}
-                            >
-                                <MenuItem value={'1'}>Admin</MenuItem>
-                                <MenuItem value={'0'}>User</MenuItem>
-                            </Select>
+                                    variant="outlined"
+                                    labelId="demo-simple-select-label"
+                                    id="role"
+                                    value={roleOption}
+                                    onChange={handleChangeRole}
+                                >
+                                    <MenuItem value={'1'}>Admin</MenuItem>
+                                    <MenuItem value={'0'}>User</MenuItem>
+                                </Select>
                             </FormControl>
-                            </Grid>
+                        </Grid> */}
                     </Grid>
                     <br />
                     <hr />
                     <Grid container spacing={4}>
                         <Grid item xs={12}>
-                            <Button style={{width: "100%",height: "100%", textAlign: 'center', fontSize: '20px'}}variant="contained" color="primary" onClick={() => { handlerCreateEmp() }}>
-                                Tạo
+                            <Button style={{ width: "100%", height: "100%", textAlign: 'center', fontSize: '20px' }} variant="contained" color="primary" onClick={() => { handlerCreateEmp() }}>
+                                Create
                                 </Button>
                         </Grid>
                     </Grid>
                 </Paper>
             </div>
+        </div>
     );
 }

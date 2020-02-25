@@ -7,6 +7,7 @@ import Employee from "./components/emp"
 import LoginPage from "./components/login"
 import CreateEmployee from "./components/createEmp"
 import Profile from "./components/profile"
+import NotFound from "./components/error"
 import Background from '../src/images/Dull.jpg'
 
 const useStyle = makeStyles(theme => ({
@@ -37,6 +38,7 @@ function App() {
         <Route extract path="/employee/id/:id" component={Employee} />
         <Route extract path="/employee/create" component={CreateEmployee} />
         <Route extract path="/profile" component={Profile} />
+        <Route extract path="/404" component={NotFound} />
       </div>
     </Router>
   );

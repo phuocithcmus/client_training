@@ -25,6 +25,19 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import axios from 'axios';
+import PrimarySearchAppBar from './header'
+import Drawer from '@material-ui/core/Drawer';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import List from '@material-ui/core/List';
+import Divider from '@material-ui/core/Divider';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import InboxIcon from '@material-ui/icons/MoveToInbox';
+import MailIcon from '@material-ui/icons/Mail';
+import ListIcon from '@material-ui/icons/List';
+import PersonIcon from '@material-ui/icons/Person';
+import AddBoxIcon from '@material-ui/icons/AddBox';
 
 export function useRouter() {
     return useContext(RouterContext);
@@ -33,10 +46,6 @@ export function useRouter() {
 const useStylesBar = makeStyles(theme => ({
     root: {
         flexGrow: 1,
-        marginTop: "5%",
-        marginBottom: 25,
-        marginLeft: "5%",
-        marginRight: "5%",
     },
     menuButton: {
         marginRight: theme.spacing(2),
@@ -57,6 +66,12 @@ const useStylesGrid = makeStyles(theme => ({
     root: {
         flexGrow: 1,
         overflow: 'hidden',
+        marginTop: "5%",
+        marginBottom: 25,
+        marginLeft: "5%",
+        marginRight: "5%",
+        width: `calc(100% - ${drawerWidth}px)`,
+        marginLeft: drawerWidth,
     },
     paper: {
         marginTop: 10,
@@ -64,6 +79,7 @@ const useStylesGrid = makeStyles(theme => ({
         padding: theme.spacing(2),
         border: '1px solid #BDBDBD',
         backgroundColor: '#F5F5F5',
+        marginLeft: "5px",
     },
     title: {
         fontWeight: 'bold',
@@ -77,6 +93,30 @@ const useStylesGrid = makeStyles(theme => ({
     },
 }));
 
+const drawerWidth = 240;
+const useStylesSide = makeStyles(theme => ({
+    root: {
+        display: 'flex',
+    },
+    appBar: {
+        width: `calc(100% - ${drawerWidth}px)`,
+        marginLeft: drawerWidth,
+    },
+    drawer: {
+        width: drawerWidth,
+        flexShrink: 0,
+    },
+    drawerPaper: {
+        width: drawerWidth,
+    },
+    toolbar: theme.mixins.toolbar,
+    content: {
+        flexGrow: 1,
+        backgroundColor: theme.palette.background.default,
+        padding: theme.spacing(3),
+    },
+}));
+
 export default function Employee() {
     const classesBar = useStylesBar();
     const { history } = useRouter();
@@ -85,6 +125,8 @@ export default function Employee() {
     let { id } = useParams();
     const classes = useStyles();
     const classesGrid = useStylesGrid();
+    const classesSide = useStylesSide();
+    const [auth, setAuth] = React.useState(false);
 
     const handleMenu = event => {
         setAnchorEl(event.currentTarget);
@@ -112,6 +154,18 @@ export default function Employee() {
     const [data, setDataEmp] = React.useState({});
 
     React.useEffect(() => {
+        if(JSON.parse(window.sessionStorage.getItem("user")) != null){
+            var auth_check = JSON.parse(window.sessionStorage.getItem("user")).role;
+            if (auth_check == 1) {
+                setAuth(true);
+            }
+            else {
+                history.push('/404');
+            }
+        }
+        else {
+            history.push('/404');
+        }
         console.log(`/api/employees/` + id);
         axios.get(`/api/employees/` + id)
             .then(res => {
@@ -119,16 +173,41 @@ export default function Employee() {
                 console.log(data_emp);
                 setDataEmp(data_emp);
             })
-            .catch(error => console.log(error));
+            .catch(error => {
+                history.push('/404');
+            });
     }, [])
 
     return (
         <div className={classesBar.root}>
+            <PrimarySearchAppBar username={JSON.parse(window.sessionStorage.getItem("user")).emp_code} drawerWidth={240} />
+            <Drawer
+                className={classesSide.drawer}
+                variant="permanent"
+                classes={{
+                    paper: classesSide.drawerPaper,
+                }}
+                anchor="left"
+            >
+                <div className={classesSide.toolbar} />
+                <Divider />
+                <List>
+
+                <ListItem button onClick={() => {history.push('/employees')}} key='List Employee'>
+                                <ListItemIcon><ListIcon/></ListItemIcon>
+                                <ListItemText primary='List Employee' />
+                            </ListItem>
+                            <ListItem button onClick={() => {history.push('/employee/create')}} key='Create Employee'>
+                                <ListItemIcon><AddBoxIcon/></ListItemIcon>
+                                <ListItemText primary='Create Employee' />
+                            </ListItem>
+                </List>
+            </Drawer>
             <div className={classesGrid.root}>
                 <Paper className={classesGrid.paper}>
                     <Grid container spacing={2}>
                         <Grid item>
-                            <div className={classesGrid.title}>Thông tin nhân viên</div>
+                            <div className={classesGrid.title}>Employee Information</div>
                         </Grid>
                     </Grid>
                     <Grid container spacing={2}>
@@ -167,7 +246,7 @@ export default function Employee() {
                 <Paper className={classesGrid.paper}>
                     <Grid container spacing={2}>
                         <Grid item>
-                            <div className={classesGrid.title}>Thông tin liên lạc</div>
+                            <div className={classesGrid.title}>Contact Information</div>
                         </Grid>
                     </Grid>
                     <Grid container spacing={2}>
