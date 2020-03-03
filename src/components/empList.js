@@ -15,17 +15,6 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import MenuIcon from '@material-ui/icons/Menu';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import Switch from '@material-ui/core/Switch';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormGroup from '@material-ui/core/FormGroup';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
-import AddIcon from '@material-ui/icons/Add';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import { useContext } from 'react';
@@ -38,24 +27,19 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import axios from 'axios';
-import { set } from 'date-fns';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Modal from '@material-ui/core/Modal';
-import { turquoise } from 'color-name';
-import Backdrop from '@material-ui/core/Backdrop';
-import Fade from '@material-ui/core/Fade';
 import PrimarySearchAppBar from './header'
 import Drawer from '@material-ui/core/Drawer';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
 import ListIcon from '@material-ui/icons/List';
-import PersonIcon from '@material-ui/icons/Person';
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
+import Grid from '@material-ui/core/Grid';
+import LockIcon from '@material-ui/icons/Lock';
+
 
 export function useRouter() {
     return useContext(RouterContext);
@@ -66,8 +50,8 @@ const useStylesBar = makeStyles(theme => ({
         flexGrow: 1,
     },
     table: {
-        width: `calc(100% - ${drawerWidth + 40}px)`,
-        marginLeft: drawerWidth + 20,
+        width: '98%',
+        marginLeft: '20px',
         paddingRight: '10px'
     },
     menuButton: {
@@ -88,45 +72,27 @@ const useStyles1 = makeStyles(theme => ({
 const drawerWidth = 240;
 const useStylesSide = makeStyles(theme => ({
     root: {
-      display: 'flex',
+        display: 'flex',
     },
     appBar: {
-      width: `calc(100% - ${drawerWidth}px)`,
-      marginLeft: drawerWidth,
+        width: `calc(100% - ${drawerWidth}px)`,
+        marginLeft: drawerWidth,
     },
     drawer: {
-      width: drawerWidth,
-      flexShrink: 0,
+        width: drawerWidth,
+        flexShrink: 0,
     },
     drawerPaper: {
-      width: drawerWidth,
+        width: drawerWidth,
+        backgroundColor: '#f4f4f4'
     },
     toolbar: theme.mixins.toolbar,
     content: {
-      flexGrow: 1,
-      backgroundColor: theme.palette.background.default,
-      padding: theme.spacing(3),
+        flexGrow: 1,
+        backgroundColor: theme.palette.background.default,
+        padding: theme.spacing(3),
     },
-  }));
-
-
-const StyledTableCell = withStyles(theme => ({
-    head: {
-        backgroundColor: theme.palette.common.black,
-        color: theme.palette.common.white,
-    },
-    body: {
-        fontSize: 14,
-    },
-}))(TableCell);
-
-const StyledTableRow = withStyles(theme => ({
-    root: {
-        '&:nth-of-type(odd)': {
-            backgroundColor: theme.palette.background.default,
-        },
-    },
-}))(TableRow);
+}));
 
 function TablePaginationActions(props) {
     const classes = useStyles1();
@@ -185,27 +151,6 @@ TablePaginationActions.propTypes = {
     page: PropTypes.number.isRequired,
     rowsPerPage: PropTypes.number.isRequired,
 };
-
-function createData(id, name, calories, fat, action) {
-    return { id, name, calories, fat, action };
-}
-
-const rows = [
-    createData(1, 'Cupcake', 305, 3.7, 0),
-    createData(2, 'Donut', 452, 25.0, 0),
-    createData(3, 'Eclair', 262, 16.0, 0),
-    createData(4, 'Frozen yoghurt', 159, 6.0, 0),
-    createData(5, 'Gingerbread', 356, 16.0, 0),
-    createData(6, 'Honeycomb', 408, 3.2, 0),
-    createData(7, 'Ice cream sandwich', 237, 9.0, 0),
-    createData(8, 'Jelly Bean', 375, 0.0, 0),
-    createData(9, 'KitKat', 518, 26.0, 0), ,
-    createData(10, 'Lollipop', 392, 0.2, 0),
-    createData(11, 'Marshmallow', 318, 0, 0),
-    createData(12, 'Nougat', 360, 19.0, 0),
-    createData(13, 'Oreo', 437, 18.0, 0),
-].sort((a, b) => (a.calories < b.calories ? -1 : 1));
-
 const useStyles2 = makeStyles(theme => (
     {
         table: {
@@ -233,35 +178,51 @@ const useStyles2 = makeStyles(theme => (
             border: '1px solid #BDBDBD',
             backgroundColor: '#F5F5F5',
         },
+        paperInformation: {
+            padding: theme.spacing(2),
+            border: '1px solid #BDBDBD',
+            backgroundColor: '#F5F5F5',
+        },
+        title: {
+            fontWeight: 'bold',
+            fontSize: '24px',
+            color: '#34495e',
+        },
+        nameField: {
+            fontWeight: 'bold',
+            fontSize: '16px',
+            color: '#34495e',
+        },
+        root: {
+            flexGrow: 1,
+            overflow: 'hidden',
+            marginTop: "5%",
+            marginBottom: 25,
+            marginLeft: "5%",
+            marginRight: "5%",
+        },
+        modal: {
+            outline: 'none'
+        },
     }
 ));
 
-const useStylesModal = makeStyles({
-    modal: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-});
-
-
 export default function Employees() {
     const classes = useStyles2();
-    const classesModal = useStylesModal();
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const classesBar = useStylesBar();
     const [auth, setAuth] = React.useState(false);
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const open = Boolean(anchorEl);
     const { history } = useRouter();
     const [openNoti, setOpen] = React.useState(false);
     const [datas, setDataEmp] = React.useState([]);
     const [idEmp, setIdEmp] = React.useState(0);
     const [loading, setLoading] = React.useState(false);
-    const [openModal, setOpeModal] = React.useState(false);
     const [opa, setOpacity] = React.useState(1);
     const classesSide = useStylesSide();
+    const [openModal, setOpenModal] = React.useState(false);
+    const [empData, setEmpData] = React.useState(null);
+    const [isActive, setActive] = React.useState(true);
 
     React.useEffect(() => {
         axios.get(`/api/employees`)
@@ -273,7 +234,7 @@ export default function Employees() {
             .catch(error => {
                 history.push('/404');
             });
-        if(JSON.parse(window.sessionStorage.getItem("user")) != null){
+        if (JSON.parse(window.sessionStorage.getItem("user")) != null) {
             var auth_check = JSON.parse(window.sessionStorage.getItem("user")).role;
             if (auth_check == 1) {
                 setAuth(true);
@@ -286,9 +247,6 @@ export default function Employees() {
             history.push('/404');
         }
     }, [])
-
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
@@ -297,26 +255,31 @@ export default function Employees() {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
-
-    const handleMenu = event => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
     const showInfo = (id) => {
-        history.push("/employee/id/" + id);
+        setOpenModal(true);
+        axios.get(`/api/employees/` + id)
+            .then(res => {
+                setEmpData(res.data);
+                console.log(res.data);
+            })
+            .catch(error => {
+                history.push('/404');
+            });
+        // history.push("/employee/id/" + id);
     };
 
-    const openDialogDeactive = (id) => {
+    const openDialogDeactive = (id, i) => {
+        datas[i] && datas[i].date_left != null ? setActive(false) : setActive(true);
         setOpen(true);
         setIdEmp(id);
     };
 
     const closeDialogDeactive = () => {
         setOpen(false);
+    };
+
+    const handleClose = () => {
+        setOpenModal(false);
     };
 
     const agreeDeactive = (id) => {
@@ -337,39 +300,27 @@ export default function Employees() {
             });
     };
 
+    const agreeActive = (id) => {
+        setOpen(false);
+        axios.post(`/api/employees/activeEmp/` + idEmp)
+            .then(res => {
+                const isActive = res.data;
+                console.log(isActive);
+                window.location.reload(false);
+            })
+            .catch(error => {
+                history.push('/404');
+            });
+    };
+
     const handleCreate = () => {
         history.push('employee/create');
     }
 
-    const handleProfile = () => {
-        history.push('/profile');
-    }
-
     return (
         <div className={classesBar.root} >
-            <PrimarySearchAppBar username={JSON.parse(window.sessionStorage.getItem("user")) != null ? JSON.parse(window.sessionStorage.getItem("user")).emp_code : null} drawerWidth={240}/>
-            <Drawer
-                    className={classesSide.drawer}
-                    variant="permanent"
-                    classes={{
-                        paper: classesSide.drawerPaper,
-                    }}
-                    anchor="left"
-                >
-                    <div className={classesSide.toolbar} />
-                    <Divider />
-                    <List>
-                       
-                    <ListItem button onClick={() => {history.push('/employees')}} key='List Employee'>
-                                <ListItemIcon><ListIcon/></ListItemIcon>
-                                <ListItemText primary='List Employee' />
-                            </ListItem>
-                            <ListItem button onClick={() => {history.push('/employee/create')}} key='Create Employee'>
-                                <ListItemIcon><AddBoxIcon/></ListItemIcon>
-                                <ListItemText primary='Create Employee' />
-                            </ListItem>
-                    </List>
-                </Drawer>
+            <PrimarySearchAppBar username={JSON.parse(window.sessionStorage.getItem("user")) != null ? JSON.parse(window.sessionStorage.getItem("user")).emp_code : null} />
+
             <div className={classesBar.table} >
                 <div className={classes.button}>
                     <Button
@@ -381,18 +332,8 @@ export default function Employees() {
                         {'Create'}
                     </Button>
                 </div>
-                {/* <div className={classes.button}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        endIcon={<AccountCircle />}
-                        onClick={handleProfile}
-                    >
-                        {'Profile'}
-                    </Button>
-                </div> */}
                 <TableContainer component={Paper}>
-                    <Table className={classes.table} aria-label="custom pagination table">
+                    <Table style={{ overflowX: 'auto' }} className={classes.table} aria-label="custom pagination table">
                         <TableHead className={classes.tableHead}>
                             <TableRow >
                                 <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">EMP CODE</TableCell>
@@ -400,41 +341,41 @@ export default function Employees() {
                                 <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">GENDER&nbsp;</TableCell>
                                 <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">DOB&nbsp;</TableCell>
                                 <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">ADDRESS&nbsp;</TableCell>
-                                <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">PHONE NUMBER&nbsp;</TableCell>
-                                <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">IDENTIFICATION CARD&nbsp;</TableCell>
+                                <TableCell style={{ color: 'white', fontWeight: 'bold', whiteSpace: 'nowrap', }} align="left">PHONE NUMBER&nbsp;</TableCell>
+                                <TableCell style={{ color: 'white', fontWeight: 'bold', whiteSpace: 'nowrap', }} align="left">IDENTIFICATION CARD&nbsp;</TableCell>
                                 <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">DATE JOIN&nbsp;</TableCell>
                                 <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">DATE LEFT&nbsp;</TableCell>
                                 <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">NOTE&nbsp;</TableCell>
                                 <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">EMP MNG&nbsp;</TableCell>
-                                <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">EMP DEPARTMENT&nbsp;</TableCell>
-                                <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">EMP TITLE&nbsp;</TableCell>
+                                <TableCell style={{ color: 'white', fontWeight: 'bold', whiteSpace: 'nowrap', }} align="left">EMP DEPARTMENT&nbsp;</TableCell>
+                                <TableCell style={{ color: 'white', fontWeight: 'bold', whiteSpace: 'nowrap', }} align="left">EMP TITLE&nbsp;</TableCell>
                                 {/* <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">ROLE&nbsp;</TableCell> */}
-                                <TableCell width={'10%'} style={{ color: 'white', fontWeight: 'bold', }} align="left">ACTION&nbsp;</TableCell>
+                                <TableCell style={{ color: 'white', fontWeight: 'bold', }} align="left">ACTION&nbsp;</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {(rowsPerPage > 0
                                 ? datas.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 : datas
-                            ).map(row => (
+                            ).map((row, i) => (
                                 <TableRow id={row.id}>
                                     <TableCell >
                                         {row.emp_code}
                                     </TableCell>
                                     <TableCell align="left">{row.emp_name}</TableCell>
                                     <TableCell align="left">{row.gender}</TableCell>
-                                    <TableCell align="left">{row.dob}</TableCell>
+                                    <TableCell style={{ whiteSpace: 'nowrap' }} align="left">{row.dob}</TableCell>
                                     <TableCell align="left">{row.address}</TableCell>
                                     <TableCell align="left">{row.phone_number}</TableCell>
                                     <TableCell align="left">{row.identification_card}</TableCell>
-                                    <TableCell align="left">{row.date_join}</TableCell>
-                                    <TableCell align="left">{row.date_left}</TableCell>
+                                    <TableCell style={{ whiteSpace: 'nowrap' }} align="left">{row.date_join}</TableCell>
+                                    <TableCell style={{ whiteSpace: 'nowrap' }} align="left">{row.date_left}</TableCell>
                                     <TableCell align="left">{row.note}</TableCell>
-                                    <TableCell align="left">{row.emp_mng}</TableCell>
+                                    <TableCell style={{ whiteSpace: 'nowrap' }} align="left">{row.emp_mng}</TableCell>
                                     <TableCell align="left">{row.emp_department}</TableCell>
-                                    <TableCell align="left">{row.emp_title}</TableCell>
+                                    <TableCell style={{ whiteSpace: 'nowrap' }} align="left">{row.emp_title}</TableCell>
                                     {/* <TableCell align="left">{row.role == 1 ? 'Admin' : 'User'}</TableCell> */}
-                                    <TableCell align="left">
+                                    <TableCell style={{ whiteSpace: 'nowrap' }} align="left">
                                         <IconButton
                                             aria-label="Show information employee"
                                             onClick={() => { showInfo(row.id) }}
@@ -442,14 +383,149 @@ export default function Employees() {
                                         >
                                             <VisibilityIcon />
                                         </IconButton>
+                                        {
+                                            empData != null && (
+                                                <Modal
+                                            aria-labelledby="transition-modal-title"
+                                            aria-describedby="transition-modal-description"
+                                            className={classes.modal}
+                                            open={openModal}
+                                            onClose={handleClose}
+                                            closeAfterTransition
+                                            disableAutoFocus={false}
+                                            BackdropComponent={Backdrop}
+                                            BackdropProps={{
+                                                timeout: 500,
+                                            }}
+                                        >
+                                            <div className={classes.root}>
+                                                <Paper className={classes.paperInformation}>
+                                                    <Paper className={classes.paperInformation}>
+                                                        <Grid container spacing={2}>
+                                                            <Grid item>
+                                                                <div className={classes.title}>Employee Information</div>
+                                                            </Grid>
+                                                        </Grid>
+                                                        <Grid container spacing={2}>
+                                                            <TableContainer component={Paper}>
+                                                                <Table aria-label="caption table">
+                                                                    <TableBody>
+                                                                        <TableRow>
+                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                ID:
+                                        </TableCell>
+                                                                            <TableCell width={'16.67%'} align="left">{empData.id}</TableCell>
+                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                USERNAME:
+                                        </TableCell>
+                                                                            <TableCell width={'16.67%'} align="left">{empData.emp_code}</TableCell>
+                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                NAME:
+                                        </TableCell>
+                                                                            <TableCell width={'16.67%'} align="left">{empData.emp_name}</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow >
+                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                GENDER:
+                                        </TableCell>
+                                                                            <TableCell width={'16.67%'} align="left">{empData.gender}</TableCell>
+                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                BIRTHDAY:
+                                        </TableCell>
+                                                                            <TableCell width={'16.67%'} align="left">{empData.dob}</TableCell>
+                                                                        </TableRow>
+                                                                    </TableBody>
+                                                                </Table>
+                                                            </TableContainer>
+                                                        </Grid>
+                                                    </Paper>
+                                                    <Paper className={classes.paperInformation}>
+                                                        <Grid container spacing={2}>
+                                                            <Grid item>
+                                                                <div className={classes.title}>Contact Information</div>
+                                                            </Grid>
+                                                        </Grid>
+                                                        <Grid container spacing={2}>
+                                                            <TableContainer component={Paper}>
+                                                                <Table aria-label="caption table">
+                                                                    <TableBody>
+                                                                        <TableRow>
+                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                ADDRESS:
+                                        </TableCell>
+                                                                            <TableCell width={'16.67%'} align="left">{empData.address}</TableCell>
+                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                IDENTIFICATION CARD:
+                                        </TableCell>
+                                                                            <TableCell width={'16.67%'} align="left">{empData.identification_card}</TableCell>
+                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                PHONE NUMBER:
+                                        </TableCell>
+                                                                            <TableCell width={'16.67%'} align="left">{empData.phone_number}</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow >
+                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                ROOM:
+                                        </TableCell>
+                                                                            <TableCell width={'16.67%'} align="left">{empData.emp_department}</TableCell>
+                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                POSITION:
+                                        </TableCell>
+                                                                            <TableCell width={'16.67%'} align="left">{empData.emp_title}</TableCell>
+                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                HIRE DATE:
+                                        </TableCell>
+                                                                            <TableCell width={'16.67%'} align="left">{empData.date_join}</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow >
+                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                LEFT DATE:
+                                        </TableCell>
+                                                                            <TableCell width={'16.67%'} align="left">{empData.date_left}</TableCell>
+                                                                        </TableRow>
+                                                                    </TableBody>
+                                                                </Table>
+                                                            </TableContainer>
+                                                        </Grid>
+                                                    </Paper>
+                                                </Paper>
+                                            </div>
+                                        </Modal>
+                                            )
+                                        }
                                         <IconButton
                                             aria-label="deactive employee"
-                                            onClick={() => { openDialogDeactive(row.id) }}
+                                            onClick={() => { openDialogDeactive(row.id, i) }}
                                             color="inherit"
                                         >
-                                            <LockOpenIcon />
+                                            {datas[i] && datas[i].date_left != null ? (<LockOpenIcon/>) : (<LockIcon/>)}
                                         </IconButton>
-                                        <Dialog
+                                        {isActive === false ? (
+                                            <Dialog
+                                            open={openNoti}
+                                            onClose={closeDialogDeactive}
+                                            aria-labelledby="alert-dialog-title"
+                                            aria-describedby="alert-dialog-description"
+                                            style={{ opacity: 0.6, }}
+                                            color="inherit"
+                                        >
+                                            <DialogTitle id="alert-dialog-title">{"Active Employee?"}</DialogTitle>
+                                            <DialogContent>
+                                                <DialogContentText id="alert-dialog-descriptionyle">
+                                                    Do you want active this employee?
+                                        </DialogContentText>
+                                            </DialogContent>
+                                            <DialogActions>
+                                                <Button variant="contained" onClick={closeDialogDeactive} color="primary">
+                                                    Disagree
+                                            </Button>
+                                                <Button variant="contained" onClick={() => { agreeActive(row.id) }} color="primary" autoFocus>
+                                                    Agree
+                                            </Button>
+                                            </DialogActions>
+                                        </Dialog>
+                                        ) : (
+                                            <Dialog
                                             open={openNoti}
                                             onClose={closeDialogDeactive}
                                             aria-labelledby="alert-dialog-title"
@@ -472,15 +548,11 @@ export default function Employees() {
                                             </Button>
                                             </DialogActions>
                                         </Dialog>
+                                        )}
+                                        
                                     </TableCell>
                                 </TableRow>
                             ))}
-
-                            {emptyRows > 0 && (
-                                <TableRow style={{ height: 53 * emptyRows }}>
-                                    <TableCell colSpan={6} />
-                                </TableRow>
-                            )}
                         </TableBody>
                         <TableFooter>
                             <TableRow >
@@ -502,11 +574,6 @@ export default function Employees() {
                         </TableFooter>
                     </Table>
                 </TableContainer>
-                {/* {
-                loading && <div className={classesModal.modal}>
-                    <CircularProgress />
-                </div>
-            } */}
             </div>
         </div>
     );

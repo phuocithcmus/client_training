@@ -4,22 +4,16 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import InputBase from '@material-ui/core/InputBase';
-import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import MenuIcon from '@material-ui/icons/Menu';
-import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import MailIcon from '@material-ui/icons/Mail';
-import NotificationsIcon from '@material-ui/icons/Notifications';
-import MoreIcon from '@material-ui/icons/MoreVert';
 import { useContext } from 'react';
-import {
-    useParams
-} from "react-router-dom";
 import { __RouterContext as RouterContext } from 'react-router';
-
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import axios from 'axios';
 
 const useStyles = makeStyles(theme => ({
     grow: {
@@ -81,6 +75,7 @@ const useStyles = makeStyles(theme => ({
             display: 'none',
         },
     },
+
 }));
 
 export function useRouter() {
@@ -91,9 +86,28 @@ export default function PrimarySearchAppBar(props) {
     const { history } = useRouter();
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = React.useState(null);
-    const [username, setUsername] = React.useState('');
 
     const isMenuOpen = Boolean(anchorEl);
+    const [value, setValue] = React.useState(null);
+    const [isCurrentTab, setCurrentTab] = React.useState({
+        'profile': false,
+        'list': false,
+        'create': false
+    });
+    const [auth, setAuth] = React.useState(false);
+
+    const handleChange = (event, newValue) => {
+        console.log(newValue);
+        if (newValue === 0) {
+            history.push('/profile');
+        }
+        if (newValue === 1) {
+            history.push('/employees');
+        }
+        if (newValue === 2) {
+            history.push('/employee/create');
+        }
+    };
 
     const handleProfileMenuOpen = event => {
         setAnchorEl(event.currentTarget);
@@ -108,9 +122,54 @@ export default function PrimarySearchAppBar(props) {
         history.push('/home');
     };
 
+    const handleGoBack = () => {
+        history.goBack();
+    };
+
     const handleMenuClose = () => {
         setAnchorEl(null);
-      };
+    };
+
+    React.useEffect(() => {
+        if (JSON.parse(window.sessionStorage.getItem("user")) != null) {
+            var auth_check = JSON.parse(window.sessionStorage.getItem("user")).role;
+            if (auth_check === 1) {
+                setAuth(true);
+            }
+            else {
+                history.push('/404');
+            }
+        }
+        else {
+            history.push('/404');
+        }
+
+        let path_page = window.location.pathname;
+        if (path_page === '/profile') {
+            setCurrentTab({
+                'profile': true,
+                'list': false,
+                'create': false
+            });
+            setValue(0);
+        }
+        if (path_page === '/employees') {
+            setCurrentTab({
+                'profile': false,
+                'list': true,
+                'create': false
+            });
+            setValue(1);
+        }
+        if (path_page === '/employee/create') {
+            setCurrentTab({
+                'profile': false,
+                'list': false,
+                'create': true
+            });
+            setValue(2);
+        }
+    }, [history])
 
     const menuId = 'primary-search-account-menu';
     const renderMenu = (
@@ -130,48 +189,35 @@ export default function PrimarySearchAppBar(props) {
 
     return (
         <div className={classes.grow}>
-            <AppBar position="fixed" style={{width: `calc(100% - ${props.drawerWidth}px)`,marginLeft: props.drawerWidth,}}>
+            <AppBar position="fixed" style={{ width: `calc(100% - ${props.drawerWidth}px)`, marginLeft: props.drawerWidth, }}>
                 <Toolbar>
                     <IconButton
                         edge="start"
                         className={classes.menuButton}
                         color="inherit"
                         aria-label="open drawer"
+                        onClick={handleGoBack}
                     >
-                        <MenuIcon />
+                        <ArrowBackIcon />
                     </IconButton>
                     <Typography className={classes.title} variant="h6" noWrap>
                         Employee Management System
-            </Typography>
-                    {/* <div className={classes.search}>
-                        <div className={classes.searchIcon}>
-                            <SearchIcon />
-                        </div>
-                        <InputBase
-                            placeholder="Search…"
-                            classes={{
-                                root: classes.inputRoot,
-                                input: classes.inputInput,
-                            }}
-                            inputProps={{ 'aria-label': 'search' }}
-                        />
-                    </div> */}
+                    </Typography>
+                    {auth && (
+                        <Tabs
+                            value={value}
+                            // indicatorColor="primary"
+                            onChange={handleChange}
+                            aria-label="disabled tabs example"
+                        >
+                            <Tab label="Profile" style={{fontSize: '1.00rem', fontFamily: 'Arial', fontWeight: 'bold', color: 'white'}} disabled={isCurrentTab.profile} />
+                            <Tab label="Employee List" style={{fontSize: '1.00rem', fontFamily: 'Arial', fontWeight: 'bold', color: 'white'}} disabled={isCurrentTab.list} />
+                            <Tab label="Create Employee" style={{fontSize: '1.00rem', fontFamily: 'Arial', fontWeight: 'bold', color: 'white'}} disabled={isCurrentTab.create} />
+                        </Tabs>
+                    )}
                     <div className={classes.grow} />
-                    <Typography className={classes.title} variant="h6" noWrap>
-                        {props.username}
-            </Typography>
                     <div className={classes.sectionDesktop}>
-                        {/* <IconButton aria-label="show 4 new mails" color="inherit">
-                            <Badge badgeContent={4} color="secondary">
-                                <MailIcon />
-                            </Badge>
-                        </IconButton>
-                        <IconButton aria-label="show 17 new notifications" color="inherit">
-                            <Badge badgeContent={17} color="secondary">
-                                <NotificationsIcon />
-                            </Badge>
-                        </IconButton> */}
-                        
+
                         <IconButton
                             edge="end"
                             aria-label="account of current user"
@@ -179,7 +225,16 @@ export default function PrimarySearchAppBar(props) {
                             aria-haspopup="true"
                             onClick={handleProfileMenuOpen}
                             color="inherit"
+                            style={{
+                                border: '2px solid white',
+                                borderRadius: '10px',
+                                padding: '4px',
+                                backgroundColor: '#f4f4f4',
+                                color: 'black',
+                                fontSize: '16px',
+                            }}
                         >
+                            {props.username}&nbsp;
                             <AccountCircle />
                         </IconButton>
                     </div>

@@ -1,55 +1,43 @@
-import React, { useState } from 'react';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import MenuIcon from '@material-ui/icons/Menu';
-import Menu from '@material-ui/core/Menu';
+import React from 'react';
 import MenuItem from '@material-ui/core/MenuItem';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import IconButton from '@material-ui/core/IconButton';
-import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import { withStyles, makeStyles, useTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import CompassCalibrationIcon from '@material-ui/icons/CompassCalibration';
 import PhoneIcon from '@material-ui/icons/Phone';
 import ContactsIcon from '@material-ui/icons/Contacts';
 import FingerprintIcon from '@material-ui/icons/Fingerprint';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import FormControl from '@material-ui/core/FormControl';
 import { useContext } from 'react';
-import {
-    useParams
-} from "react-router-dom";
 import { __RouterContext as RouterContext } from 'react-router';
 import TextField from '@material-ui/core/TextField';
 import DateFnsUtils from '@date-io/date-fns';
 import {
     MuiPickersUtilsProvider,
-    KeyboardTimePicker,
     KeyboardDatePicker,
 } from '@material-ui/pickers';
 import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
 import axios from 'axios';
-import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
 import moment from 'moment';
 import PrimarySearchAppBar from './header'
-import { tr } from 'date-fns/esm/locale';
 import Drawer from '@material-ui/core/Drawer';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
 import ListIcon from '@material-ui/icons/List';
-import PersonIcon from '@material-ui/icons/Person';
 import AddBoxIcon from '@material-ui/icons/AddBox';
+import PhoneInput, { formatPhoneNumber, formatPhoneNumberIntl, isValidPhoneNumber } from 'react-phone-number-input'
+import { waitForElementToBeRemoved } from '@testing-library/dom';
+import 'react-phone-input-2/lib/style.css'
+import { getCountries, getCountryCallingCode } from 'react-phone-number-input/input'
+import Input from 'react-phone-number-input/input'
+import en from 'react-phone-number-input/locale/en.json'
+import { set } from 'date-fns/esm';
 
 export function useRouter() {
     return useContext(RouterContext);
@@ -95,44 +83,47 @@ const useStylesGrid = makeStyles(theme => ({
         fontSize: '32px',
         color: '#34495e',
     },
+    error: {
+        fontWeight: 'bold',
+        fontSize: '20px',
+        color: 'red',
+    }
 }));
 
 const drawerWidth = 240;
 const useStylesSide = makeStyles(theme => ({
     root: {
-      display: 'flex',
+        display: 'flex',
     },
     appBar: {
-      width: `calc(100% - ${drawerWidth}px)`,
-      marginLeft: drawerWidth,
+        width: `calc(100% - ${drawerWidth}px)`,
+        marginLeft: drawerWidth,
     },
     drawer: {
-      width: drawerWidth,
-      flexShrink: 0,
+        width: drawerWidth,
+        flexShrink: 0,
     },
     drawerPaper: {
-      width: drawerWidth,
+        width: drawerWidth,
+        backgroundColor: '#f4f4f4'
     },
     toolbar: theme.mixins.toolbar,
     content: {
-      flexGrow: 1,
-      backgroundColor: theme.palette.background.default,
-      padding: theme.spacing(3),
+        flexGrow: 1,
+        backgroundColor: theme.palette.background.default,
+        padding: theme.spacing(3),
     },
-  }));
+}));
 
 export default function CreateEmployee() {
     const classesBar = useStylesBar();
     const classesSide = useStylesSide();
     const { history } = useRouter();
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const open = Boolean(anchorEl);
-    let { id } = useParams();
     const classesGrid = useStylesGrid();
-    const [gender, setGender] = React.useState('');
-    const msgICard = 'CMND must have at least 9 characters and digits';
-    const msgPhone = 'Phone number must have at least 10 characters and digits';
-    const msgUsername = 'Username must correct with pattern';
+    const [msgPhone, setMsgPhone] = React.useState('');
+    const [msgICard, setMsgICard] = React.useState('');
+    const [msgUsername, setMsgUsername] = React.useState('');
+
     const [error, setError] = React.useState({
         icard: {
             isError: false,
@@ -145,10 +136,8 @@ export default function CreateEmployee() {
         username: {
             isError: false,
             msg: ''
-        }
+        },
     });
-    // The first commit of Material-UI
-    const [selectedDate, setSelectedDate] = React.useState(new Date());
 
     const [department, setDepartment] = React.useState([]);
     const [title, setTitle] = React.useState([]);
@@ -159,16 +148,12 @@ export default function CreateEmployee() {
     const [titleOption, settitleOption] = React.useState("");
     const [birthdayOption, setbirthdayOption] = React.useState(moment(new Date()).format('YYYY-MM-DD'));
     const [roleOption, setRoleOption] = React.useState(0);
-    const [mngOption, setMngOption] = React.useState([]);
+    const [mngOption, setMngOption] = React.useState("");
     const [auth, setAuth] = React.useState(false);
-
-    const handleMenu = event => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
+    const [value, setValue] = React.useState('');
+    const [valueIcard, setValueIcard] = React.useState('');
+    const [valueUsername, setValueUsername] = React.useState('');
+    const [country, setCountry] = React.useState('US');
 
     const handleDateChange = date => {
         console.log(moment(date).format('YYYY-MM-DD'));
@@ -198,27 +183,67 @@ export default function CreateEmployee() {
         settitleOption(event.target.value);
     };
 
-    const handleChangeRole = event => {
-        setRoleOption(event.target.value);
-    };
-
     const handleChangeMng = event => {
         setMngOption(event.target.value);
     };
 
-    const checkEmail = (username) => {
+    const checkEmail = (evt) => {
+        const username = evt.target.value;
         var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        return re.test(String(username).toLowerCase());
+        if (!re.test(String(username).toLowerCase())) {
+            setMsgUsername('Username must correct with pattern');
+        }
+        else {
+            setMsgUsername('');
+        }
+        setValueUsername(username);
     };
 
-    const checkICard = (icard) => {
+    const checkICard = (evt) => {
+        const valueIcard = evt.target.value;
         var re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{3}$/im
-        return re.test(String(icard).toLowerCase());
+        if (!re.test(String(valueIcard).toLowerCase())) {
+            setMsgICard('CMND must have at least 9 characters and digits');
+        }
+        else {
+            setMsgICard('');
+        }
+        console.log(valueIcard);
+        setValueIcard(valueIcard);
     };
 
-    const checkPhoneNumber = (phoneNumber) => {
-        var re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im
-        return re.test(String(phoneNumber).toLowerCase());
+    const checkPhoneNumber = (vl) => {
+        if (!vl) {
+            console.log('Phone number required');
+        }
+        if (!isValidPhoneNumber) {
+            console.log('Invalid phone number');
+        }
+    };
+
+    const changePhoneNumber = (value) => {
+        if (!value) {
+            setMsgPhone('Phone number required');
+            console.log('Phone number required');
+        }
+        else if (!isValidPhoneNumber(value)) {
+            setMsgPhone('Invalid phone number');
+            console.log('Invalid phone number');
+        }
+        else {
+            setMsgPhone('');
+        }
+        setValue(value);
+    };
+
+    const set_default_value_text = (username, phone, icard) => {
+        setError(
+            {
+                icard,
+                phone,
+                username
+            }
+        );
     };
 
     const handlerCreateEmp = () => {
@@ -228,7 +253,7 @@ export default function CreateEmployee() {
             gender: genderOption,
             address: document.getElementById('address').value,
             dob: birthdayOption,
-            phone_number: document.getElementById('phoneNumber').value,
+            phone_number: value,
             identification_card: document.getElementById('identification_card').value,
             emp_department: departmentOption,
             emp_title: titleOption,
@@ -238,99 +263,28 @@ export default function CreateEmployee() {
             emp_mng: mngOption,
         }
 
-        if (!checkEmail(emp.emp_code)) {
-            setError(
-                {
-                    icard: {
-                        isError: error.icard.isError,
-                        msg: error.icard.msg
-                    },
-                    phone: {
-                        isError: error.phone.isError,
-                        msg: error.phone.msg
-                    },
-                    username: {
-                        isError: true,
-                        msg: msgUsername,
-                    }
-                }
-            );
-        }
-
-        if (!checkICard(emp.identification_card)) {
-            setError(
-                {
-                    icard: {
-                        isError: true,
-                        msg: msgICard
-                    },
-                    phone: {
-                        isError: error.phone.isError,
-                        msg: error.phone.msg
-                    },
-                    username: {
-                        isError: error.username.isError,
-                        msg: error.username.msg
-                    }
-                }
-            );
-        }
-
-        if (!checkPhoneNumber(emp.phone_number)) {
-            setError(
-                {
-                    icard: {
-                        isError: error.icard.isError,
-                        msg: error.icard.msg
-                    },
-                    phone: {
-                        isError: true,
-                        msg: msgPhone
-                    },
-                    username: {
-                        isError: error.username.isError,
-                        msg: error.username.msg
-                    }
-                }
-            );
-        }
-
-        if (!checkEmail(emp.emp_code) || !checkICard(emp.identification_card) || !checkPhoneNumber(emp.phone_number)) {
+        if (msgPhone !== '' || msgICard !== '' || msgUsername !== '') {
             return;
         }
         else {
-            setError(
-                {
-                    icard: {
-                        isError: false,
-                        msg: ''
-                    },
-                    phone: {
-                        isError: false,
-                        msg: ''
-                    },
-                    username: {
-                        isError: false,
-                        msg: ''
-                    }
-                }
-            );
-            console.log(emp);
             axios({
                 method: 'post',
                 headers: {
                     'crossDomain': true,
-                    //'Content-Type': 'application/json',
                     'Content-Type': 'text/plain;charset=utf-8',
                 },
-                url: '/api/employees/create',
+                url: '/api/create',
                 data: emp,
             })
                 .then(function (response) {
                     var data = response.data;
+                    if (data === 'HADEMP') {
+                        setMsgUsername('Username already exists');
+                    }
+                    else if (data === 'SUCCESS') {
+                        history.push('/employees')
+                    }
                     console.log(data);
-                    history.push('/employees')
-                    //if login token works then get records
                 })
                 .catch(function (xhr, ajaxOptions, thrownError) {
                     alert(xhr.status);
@@ -340,7 +294,7 @@ export default function CreateEmployee() {
     }
 
     React.useEffect(() => {
-        if(JSON.parse(window.sessionStorage.getItem("user")) != null){
+        if (JSON.parse(window.sessionStorage.getItem("user")) != null) {
             var auth_check = JSON.parse(window.sessionStorage.getItem("user")).role;
             if (auth_check == 1) {
                 setAuth(true);
@@ -372,33 +326,19 @@ export default function CreateEmployee() {
     return (
         <div className={classesBar.root}>
             <div className={classesGrid.root}>
-            <PrimarySearchAppBar username={JSON.parse(window.sessionStorage.getItem("user")).emp_code} drawerWidth={240}/>
-                <Drawer
-                    className={classesSide.drawer}
-                    variant="permanent"
-                    classes={{
-                        paper: classesSide.drawerPaper,
-                    }}
-                    anchor="left"
-                >
-                    <div className={classesSide.toolbar} />
-                    <Divider />
-                    <List>
-                       
-                            <ListItem button onClick={() => {history.push('/employees')}} key='List Employee'>
-                                <ListItemIcon><ListIcon/></ListItemIcon>
-                                <ListItemText primary='List Employee' />
-                            </ListItem>
-                            <ListItem button onClick={() => {history.push('/employee/create')}} key='Create Employee'>
-                                <ListItemIcon><AddBoxIcon/></ListItemIcon>
-                                <ListItemText primary='Create Employee' />
-                            </ListItem>
-                    </List>
-                </Drawer>
+                <PrimarySearchAppBar username={JSON.parse(window.sessionStorage.getItem("user")).emp_code} />
+
                 <Paper className={classesGrid.paper}>
                     <Grid container spacing={2}>
                         <Grid item>
                             <div className={classesGrid.title}>Create Account</div>
+                            <div className={classesGrid.error}>
+                                {msgPhone}
+                                <br/>
+                                {msgICard}
+                                <br/>
+                                {msgUsername}
+                            </div>
                         </Grid>
                     </Grid>
                     <hr />
@@ -410,18 +350,13 @@ export default function CreateEmployee() {
                     </Grid>
                     <Grid container spacing={4}>
                         <Grid item xs={6}>
-                            <TextField error={error.username.isError} helperText={error.username.msg} className={classesGrid.textfield} className={classesGrid.textfield} fullWidth id="username" label="Username" variant="outlined" InputProps={{
+                            <TextField value={valueUsername} onChange={checkEmail} className={classesGrid.textfield} fullWidth id="username" label="Username" variant="outlined" InputProps={{
                                 endAdornment: (
                                     <AccountCircle />
                                 ),
                             }} />
                         </Grid>
                         <Grid item xs={6}>
-                            {/* <TextField className={classesGrid.textfield} fullWidth id="password" label="Mật khẩu" variant="outlined" InputProps={{
-                                endAdornment: (
-                                    <CompassCalibrationIcon />
-                                ),
-                            }} /> */}
                             <div style={{ fontSize: '18px', color: 'red' }}><b>Type username with format: "emp_code" + @example.com</b></div>
                         </Grid>
                     </Grid>
@@ -440,12 +375,42 @@ export default function CreateEmployee() {
                                 ),
                             }} />
                         </Grid>
-                        <Grid item xs={6}>
-                            <TextField error={error.phone.isError} helperText={error.phone.msg} className={classesGrid.textfield} id="phoneNumber" label="Phone Number" variant="outlined" InputProps={{
+                        <Grid item container xs={6}>
+                            {/* <TextField error={error.phone.isError} helperText={error.phone.msg} className={classesGrid.textfield} id="phoneNumber" label="Phone Number" variant="outlined" InputProps={{
                                 endAdornment: (
                                     <PhoneIcon />
                                 ),
-                            }} />
+                            }} /> */}
+                            <Grid item xs={3} style={{ marginRight: '20px' }}>
+                                <Select
+                                    value={country}
+                                    onChange={event => setCountry(event.target.value || undefined)}>
+                                    <option value="">
+                                        {en['ZZ']}
+                                    </option>
+                                    {getCountries().map((country) => (
+                                        <option key={country} value={country}>
+                                            {country} +{getCountryCallingCode(country)}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </Grid>
+                            <br />
+                            <Grid item xs={8}>
+                                {/* <TextField error={error.phone.isError} helperText={error.phone.msg} className={classesGrid.textfield} id="phoneNumber" label="Phone Number" variant="outlined" InputProps={{
+                                endAdornment: (
+                                    <PhoneIcon />
+                                ),
+                            }} /> */}
+                                <Input className={classesGrid.textfield}
+                                    style={{ borderRadius: '4px', fontSize: '16px' }}
+                                    placeholder="Enter phone number"
+                                    country={country}
+                                    value={value}
+                                    onChange={changePhoneNumber}
+                                    error={value ? (isValidPhoneNumber(value) ? undefined : console.log('Invalid phone number')) : console.log('Phone number required')} />
+
+                            </Grid>
                         </Grid>
                     </Grid>
                     <Grid container spacing={4}>
@@ -476,7 +441,7 @@ export default function CreateEmployee() {
                     </Grid>
                     <Grid container spacing={4}>
                         <Grid item xs={6}>
-                            <TextField error={error.icard.isError} className={classesGrid.textfield} id="identification_card" label="Identification Card" variant="outlined" helperText={error.icard.msg} InputProps={{
+                            <TextField value={valueIcard} onChange={checkICard} id="identification_card" label="Identification Card" variant="outlined" helperText={error.icard.msg} InputProps={{
                                 endAdornment: (
                                     <FingerprintIcon />
                                 ),
@@ -556,21 +521,6 @@ export default function CreateEmployee() {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        {/* <Grid item xs={6}>
-                            <FormControl variant="outlined" className={classesGrid.textfield}>
-                                <InputLabel id="demo-simple-select-label">Vai trò</InputLabel>
-                                <Select
-                                    variant="outlined"
-                                    labelId="demo-simple-select-label"
-                                    id="role"
-                                    value={roleOption}
-                                    onChange={handleChangeRole}
-                                >
-                                    <MenuItem value={'1'}>Admin</MenuItem>
-                                    <MenuItem value={'0'}>User</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Grid> */}
                     </Grid>
                     <br />
                     <hr />

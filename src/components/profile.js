@@ -228,15 +228,14 @@ function countOffDaySuitableToCurrentDate(year, month, current_date) {
         date = new Date(year, month, day);
     }
 
-    return new Date(year, month, current_date).getDate() - counter;
+    return new Date(year, month, current_date).getDate() - counter - 1;
 }
 
 export default function Profile() {
-    const queueRef = React.useRef([]);
     const [open, setOpen] = React.useState(false);
     const [clock, setClock] = React.useState(new Date().toLocaleString());
     const [stateLock, setStateLock] = React.useState(
-        [false, false]
+        [false, true]
     );
     const [workingTime, setWorkingTime] = React.useState(
         [
@@ -260,18 +259,21 @@ export default function Profile() {
     const classes = useStyles();
     const classesBar = useStylesBar();
     const classesGrid = useStylesGrid();
-    const classesSide = useStylesSide();
 
     const [dataWorkingHours, setDataWorkingHours] = React.useState(
         {
             label: 'Working hours',
-            data: [['January', 0], ['February', 0], ['March', 0], ['April', 0], ['May', 0], ['July', 0], ['June', 0], ['August', 0], ['September', 0], ['October', 0], ['November', 0], ['December', 0]]
+            data: [
+                ['January', 0], ['February', 0], ['March', 0], ['April', 0], ['May', 0], ['July', 0], ['June', 0], ['August', 0], ['September', 0], ['October', 0], ['November', 0], ['December', 0]
+            ]
         }
     );
     const [dataOffHours, setDataOffHours] = React.useState(
         {
             label: 'Off hours',
-            data: [['January', 0], ['February', 0], ['March', 0], ['April', 0], ['May', 0], ['July', 0], ['June', 0], ['August', 0], ['September', 0], ['October', 0], ['November', 0], ['December', 0]]
+            data: [
+                ['January', 0], ['February', 0], ['March', 0], ['April', 0], ['May', 0], ['July', 0], ['June', 0], ['August', 0], ['September', 0], ['October', 0], ['November', 0], ['December', 0]
+            ]
         }
     );
     var today = new Date();
@@ -309,7 +311,6 @@ export default function Profile() {
         axios.get(`/api_working/working_time?id=` + user.id)
             .then(res => {
                 setWorkingTime(res.data);
-                console.log(res.data);
             })
             .catch(error => {
                 history.push('/404');
@@ -358,7 +359,6 @@ export default function Profile() {
     React.useEffect(() => {
         //Set user from widowStorage Session
         setUser(JSON.parse(window.sessionStorage.getItem("user")));
-        console.log(user)
         axios.get(`/api/profile/` + user.id)
             .then(res => {
                 const data_emps = res.data;
@@ -369,33 +369,41 @@ export default function Profile() {
             });
     }, [])
 
+    // set off hours and working hours data into chart
     React.useEffect(() => {
         var d = new Date();
-        axios.get(`/api_working/number_hour_off?id=` + user.id + '&date_month=' + d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate())
-            .then(res => {
-                var month = 0;
-                var date = new Date(d.getFullYear(), month, 1);
-                while (date.getMonth() < d.getMonth()) {
 
-                    var data = dataOffHours;
-                    data.data[month][1] = res.data - (new Date(date.getFullYear(), date.getMonth(), 0).getDate() - countOffDaySuitable(date.getFullYear(), date.getMonth())) * 8;
+        if (emp.emp_code) {
+            console.log('arr here', emp);
 
-                    setDataOffHours(data);
-                    month += 1;
-                    date = new Date(d.getFullYear(), month, 1);
+            const arr = [];
+            var month = 0;
+            var date = new Date(d.getFullYear(), month, 1);
+            var data = dataOffHours;
+            while (date.getMonth() <= d.getMonth()) {
+                arr.push(axios.get(`/api_working/number_hour_off?id=` + user.id + '&date_month=' + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate()));
+                month += 1;
+                date = new Date(d.getFullYear(), month, 1);
+            }
 
-                    if (month === date.getMonth()) {
-                        data.data[month][1] = (countOffDaySuitableToCurrentDate(today.getFullYear(), today.getMonth(), today.getDate()) * 8 + emp.actualHourOff) - emp.actualWorkingDayHour;
-                        setDataOffHours(data);
+            Promise.all(arr).then((response) => {
+                response.map((res, i) => {
+                    data.data[i][1] = res.data - (new Date(today.getFullYear(), i, 0).getDate() - countOffDaySuitable(today.getFullYear(), i)) * 8;
+
+                    if (i === today.getMonth()) {
+                        data.data[i][1] = (countOffDaySuitableToCurrentDate(today.getFullYear(), today.getMonth(), today.getDate()) * 8 + emp.actualHourOff) - emp.actualWorkingDayHour;
                     }
-                }
-            })
-            .catch(error => {
-                history.push('/404');
-            });
-    })
+                });
+                setDataOffHours(data);
 
-    React.useEffect(() => {
+                working_hour_func();
+            }
+            ).catch((err) => { history.push('/404') });
+        }
+    }, [emp])
+
+    // set working hours data into chart
+    const working_hour_func = () => {
         var d = new Date();
         var month = 0;
         var date = new Date(d.getFullYear(), month, 1);
@@ -403,23 +411,23 @@ export default function Profile() {
 
             var dataWorking = dataWorkingHours;
             dataWorking.data[month][1] = countOffDaySuitable(date.getFullYear(), date.getMonth()) * 8 - dataOffHours.data[month][1];
-            setDataWorkingHours(dataWorking);
 
             month += 1;
             date = new Date(d.getFullYear(), month, 1);
 
             if (month === date.getMonth()) {
                 dataWorking.data[month][1] = emp.actualWorkingDayHour;
-                setDataWorkingHours(dataWorking);
             }
-        }
-    })
 
+            setDataWorkingHours(dataWorking);
+        }
+    };
+
+    // display button clock in clock out
     React.useEffect(() => {
         axios.get(`/api_working/isChecked?id=` + user.id)
             .then(res => {
                 var isChecked = res.data;
-                console.log(isChecked)
                 if (isChecked[0] == 1) {
                     if (isChecked[1] == 1) {
                         setStateLock(
@@ -442,7 +450,6 @@ export default function Profile() {
         axios.get(`/api_working/timeChecked?id=` + user.id)
             .then(res => {
                 var time = res.data;
-                console.log(time)
                 setTimeChecked(
                     {
                         time_in: time[0],
@@ -459,33 +466,15 @@ export default function Profile() {
     return (
         <div className={classesBar.root}>
             <PrimarySearchAppBar username={JSON.parse(window.sessionStorage.getItem("user")).emp_code} drawerWidth={0} />
-            {/* <Drawer
-                className={classesSide.drawer}
-                variant="permanent"
-                classes={{
-                    paper: classesSide.drawerPaper,
-                }}
-                anchor="left"
-            >
-
-                <div className={classesSide.toolbar} />
-                <Divider />
-                <List>
-                </List>
-            </Drawer> */}
             <div className={classesGrid.root}>
                 <Paper className={classesGrid.paper}>
                     <Grid container spacing={2}>
-                        {/* <Grid className={classesGrid.clock} item xs={4}>
-                            <BellIcon width='50' height="50" active={true} animate={true} color='#4caf50' />
-                            {clock}
-                        </Grid> */}
                         <Grid item xs={2}>
                             <Button
                                 variant="contained"
                                 color="primary"
                                 className={classes.button}
-                                endIcon={<CheckCircleOutlineIcon clickClockIn />}
+                                endIcon={<CheckCircleOutlineIcon />}
                                 onClick={() => { clickClockIn() }}
                                 disabled={stateLock[0]}
                             >
@@ -493,10 +482,10 @@ export default function Profile() {
                             </Button>
                         </Grid>
                         <Grid className={classesGrid.timeCheck} item xs={3}>
-                            {timeChecked.time_in != '' && (
+                            {timeChecked.time_in !== '' && (
                                 <div className={classesGrid.timeCheck} ><HttpsIcon width='50' height="50" />: {timeChecked.time_in}</div>
                             )}
-                            {timeChecked.time_in == '' && (
+                            {timeChecked.time_in === '' && (
                                 <div className={classesGrid.timeCheck} >{clock}</div>
                             )}
                         </Grid>
@@ -505,7 +494,7 @@ export default function Profile() {
                                 variant="contained"
                                 color="secondary"
                                 className={classes.button}
-                                endIcon={<CheckCircleOutlineIcon clickClockOut />}
+                                endIcon={<CheckCircleOutlineIcon />}
                                 onClick={() => { clickClockOut() }}
                                 disabled={stateLock[1]}
                             >
@@ -514,10 +503,10 @@ export default function Profile() {
                         </Grid>
                         <Grid className={classesGrid.timeCheck} item xs={3}>
                             {/* <br/> */}
-                            {timeChecked.time_out != '' && (
+                            {timeChecked.time_out !== '' && (
                                 <div className={classesGrid.timeCheck} ><LockOpenIcon width='50' height="50" />: {timeChecked.time_out} </div>
                             )}
-                            {timeChecked.time_out == '' && timeChecked.time_in != '' && (
+                            {timeChecked.time_out === '' && timeChecked.time_in !== '' && (
                                 <div className={classesGrid.timeCheck} >{clock}</div>
                             )}
                         </Grid>
@@ -526,7 +515,7 @@ export default function Profile() {
                                 variant="contained"
                                 color="primary"
                                 className={classes.button}
-                                endIcon={<DetailsIcon clickDetail />}
+                                endIcon={<DetailsIcon />}
                                 onClick={() => { clickDetail() }}
                             >
                                 {'DETAILS'}
@@ -549,41 +538,28 @@ export default function Profile() {
                                     <Table aria-label="simple table">
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell style={{fontWeight: 'bold', backgroundColor: '#3f51b5', color: 'white'}}>TIME IN</TableCell>
-                                                <TableCell style={{fontWeight: 'bold', backgroundColor: '#3f51b5', color: 'white'}}>TIME OUT</TableCell>
-                                                <TableCell style={{fontWeight: 'bold', backgroundColor: '#3f51b5', color: 'white'}}>NOTE</TableCell>
-                                                <TableCell style={{fontWeight: 'bold', backgroundColor: '#3f51b5', color: 'white'}}>HOURS</TableCell>
+                                                <TableCell style={{ fontWeight: 'bold', backgroundColor: '#3f51b5', color: 'white' }}>TIME IN</TableCell>
+                                                <TableCell style={{ fontWeight: 'bold', backgroundColor: '#3f51b5', color: 'white' }}>TIME OUT</TableCell>
+                                                <TableCell style={{ fontWeight: 'bold', backgroundColor: '#3f51b5', color: 'white' }}>NOTE</TableCell>
+                                                <TableCell style={{ fontWeight: 'bold', backgroundColor: '#3f51b5', color: 'white' }}>HOURS</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            { workingTime.map(row => (
-                                                <TableRow key={row.name}>
-                                                    <TableCell style={{fontWeight: 'bold'}}>
+                                            {workingTime.map((row, i) => (
+                                                <TableRow key={i}>
+                                                    <TableCell style={{ fontWeight: 'bold' }}>
                                                         {row.time_in}
                                                     </TableCell >
-                                                    <TableCell style={{fontWeight: 'bold'}}>{row.time_out}</TableCell>
-                                                    <TableCell style={{fontWeight: 'bold'}}>{row.mark}</TableCell>
-                                                    <TableCell style={{fontWeight: 'bold'}}>{row.time}</TableCell>
+                                                    <TableCell style={{ fontWeight: 'bold' }}>{row.time_out}</TableCell>
+                                                    <TableCell style={{ fontWeight: 'bold' }}>{row.mark}</TableCell>
+                                                    <TableCell style={{ fontWeight: 'bold' }}>{row.time}</TableCell>
                                                 </TableRow>
                                             ))}
-                                            {/* {workingTime.size == 0 && (
-                                                <div>abcxyz</div>
-                                            )} */}
                                         </TableBody>
                                     </Table>
                                 </TableContainer>
                             </div>
                         </Modal>
-                        {/* <Grid className={classesGrid.timeCheck} item xs={1}>
-                            <Button
-                                style={{ backgroundColor: 'rgba(0, 0, 0, 0.12)' }}
-                                className={classes.button}
-                                endIcon={<ExitToAppIcon logout />}
-                                onClick={() => { logout() }}
-                            >
-                                {'Log out'}
-                            </Button>
-                        </Grid> */}
                     </Grid>
                 </Paper>
                 <Paper className={classesGrid.paper}>
@@ -621,7 +597,7 @@ export default function Profile() {
                                         <TableCell className={classesGrid.nameField} component="th" scope="row">
                                             HOURS OFF:
                                         </TableCell>
-                                        <TableCell align="left">{(countOffDaySuitableToCurrentDate(today.getFullYear(), today.getMonth(), 20) * 8 + emp.actualHourOff) - emp.actualWorkingDayHour} (hours)</TableCell>
+                                        <TableCell align="left">{(countOffDaySuitableToCurrentDate(today.getFullYear(), today.getMonth(), today.getDate()) * 8 + emp.actualHourOff) - emp.actualWorkingDayHour} (hours)</TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table>
@@ -640,10 +616,9 @@ export default function Profile() {
                                 width: '1000px',
                                 height: '400px',
                             }}>
-                                <Chart data={data} series={series} axes={axes} tooltip />
+                                <Chart width='1000px' height='400px' data={data} series={series} axes={axes} tooltip />
                             </div>
                         </Grid>
-
                     </Grid>
                 </Paper>
             </div>

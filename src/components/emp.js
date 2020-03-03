@@ -4,39 +4,23 @@ import {
     useParams
 } from "react-router-dom";
 import { __RouterContext as RouterContext } from 'react-router';
-import { withStyles, makeStyles, useTheme } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import MenuIcon from '@material-ui/icons/Menu';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import IconButton from '@material-ui/core/IconButton';
-import Container from '@material-ui/core/Container';
+import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import ButtonBase from '@material-ui/core/ButtonBase';
-import Avatar from '@material-ui/core/Avatar';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import axios from 'axios';
 import PrimarySearchAppBar from './header'
 import Drawer from '@material-ui/core/Drawer';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
 import ListIcon from '@material-ui/icons/List';
-import PersonIcon from '@material-ui/icons/Person';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 
 export function useRouter() {
@@ -55,13 +39,6 @@ const useStylesBar = makeStyles(theme => ({
     },
 }));
 
-const useStyles = makeStyles(theme => ({
-    root: {
-        marginTop: 15,
-        flexGrow: 1,
-    },
-}));
-
 const useStylesGrid = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -70,8 +47,6 @@ const useStylesGrid = makeStyles(theme => ({
         marginBottom: 25,
         marginLeft: "5%",
         marginRight: "5%",
-        width: `calc(100% - ${drawerWidth}px)`,
-        marginLeft: drawerWidth,
     },
     paper: {
         marginTop: 10,
@@ -108,6 +83,7 @@ const useStylesSide = makeStyles(theme => ({
     },
     drawerPaper: {
         width: drawerWidth,
+        backgroundColor: '#f4f4f4'
     },
     toolbar: theme.mixins.toolbar,
     content: {
@@ -121,42 +97,16 @@ export default function Employee() {
     const classesBar = useStylesBar();
     const { history } = useRouter();
     const [anchorEl, setAnchorEl] = React.useState(null);
-    const open = Boolean(anchorEl);
     let { id } = useParams();
-    const classes = useStyles();
     const classesGrid = useStylesGrid();
     const classesSide = useStylesSide();
     const [auth, setAuth] = React.useState(false);
-
-    const handleMenu = event => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-    const employee = {
-        id: 7,
-        username: 'phuocnd',
-        name: 'nguyen duc phuoc',
-        gender: 'Nam',
-        birthdate: new Date('1974/11/15'),
-        hiredate: new Date('2005/05/11'),
-        leftdate: '',
-        address: '4600 N Virginia Rd.',
-        icard: '123456789',
-        room: 'room 1',
-        phone: '0123456789',
-        position: 'Controller',
-    };
-
     const [data, setDataEmp] = React.useState({});
 
     React.useEffect(() => {
-        if(JSON.parse(window.sessionStorage.getItem("user")) != null){
+        if (JSON.parse(window.sessionStorage.getItem("user")) != null) {
             var auth_check = JSON.parse(window.sessionStorage.getItem("user")).role;
-            if (auth_check == 1) {
+            if (auth_check === 1) {
                 setAuth(true);
             }
             else {
@@ -180,29 +130,8 @@ export default function Employee() {
 
     return (
         <div className={classesBar.root}>
-            <PrimarySearchAppBar username={JSON.parse(window.sessionStorage.getItem("user")).emp_code} drawerWidth={240} />
-            <Drawer
-                className={classesSide.drawer}
-                variant="permanent"
-                classes={{
-                    paper: classesSide.drawerPaper,
-                }}
-                anchor="left"
-            >
-                <div className={classesSide.toolbar} />
-                <Divider />
-                <List>
-
-                <ListItem button onClick={() => {history.push('/employees')}} key='List Employee'>
-                                <ListItemIcon><ListIcon/></ListItemIcon>
-                                <ListItemText primary='List Employee' />
-                            </ListItem>
-                            <ListItem button onClick={() => {history.push('/employee/create')}} key='Create Employee'>
-                                <ListItemIcon><AddBoxIcon/></ListItemIcon>
-                                <ListItemText primary='Create Employee' />
-                            </ListItem>
-                </List>
-            </Drawer>
+            <PrimarySearchAppBar username={JSON.parse(window.sessionStorage.getItem("user")).emp_code} />
+            
             <div className={classesGrid.root}>
                 <Paper className={classesGrid.paper}>
                     <Grid container spacing={2}>

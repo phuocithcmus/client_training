@@ -97,7 +97,7 @@ export default function LoginPage(props) {
     }
 
     const responseGoogleFail = (response) => {
-        console.log(response);
+        history.push("/404");
     }
 
     return (
@@ -105,7 +105,7 @@ export default function LoginPage(props) {
             <Paper className={classesGrid.paper}>
                 <Grid className={classesGrid.gridItem} container spacing={2}>
                     <Grid item>
-                        <div className={classesGrid.title}>Đăng nhập</div>
+                        <div className={classesGrid.title}>Login</div>
                     </Grid>
                 </Grid>
                 <hr />
@@ -114,7 +114,7 @@ export default function LoginPage(props) {
                         <GoogleLogin className={classesGrid.buttonGoogle} 
                             // client secret: h3uvTv5d_VXc6uPoCRaaq1G7
                             clientId="91542920287-r66lr46326lshr3ma83ealobo5ddreov.apps.googleusercontent.com"
-                            buttonText="Đăng nhập với google"
+                            buttonText="Login with google"
                             onSuccess={responseGoogle}
                             onFailure={responseGoogleFail}
                         />
@@ -122,12 +122,12 @@ export default function LoginPage(props) {
                 </Grid>
                 <Grid className={classesGrid.gridItem} container spacing={2}>
                     <Grid item>
-                        <div><b>Hoặc</b></div>
+                        <div><b>Or</b></div>
                     </Grid>
                 </Grid>
                 <Grid className={classesGrid.gridItem} container spacing={4}>
                     <Grid item xs>
-                        <TextField className={classesGrid.textfield} fullWidth id="user" label="Tên tài khoản" variant="outlined" InputProps={{
+                        <TextField className={classesGrid.textfield} fullWidth id="user" label="Username" variant="outlined" InputProps={{
                             endAdornment: (
                                 <AccountCircle />
                             ),
@@ -136,7 +136,7 @@ export default function LoginPage(props) {
                 </Grid>
                 <Grid className={classesGrid.gridItem} container spacing={4}>
                     <Grid item xs>
-                        <TextField className={classesGrid.textfield} fullWidth id="password" label="Mật khẩu" variant="outlined" InputProps={{
+                        <TextField className={classesGrid.textfield} fullWidth id="password" label="Password" variant="outlined" InputProps={{
                             endAdornment: (
                                 <CompassCalibrationIcon />
                             ),
@@ -146,8 +146,8 @@ export default function LoginPage(props) {
                 <hr />
                 <Grid className={classesGrid.gridItem} container >
                     <Grid item xs>
-                        <Button className={classesGrid.buttonLogin} variant="contained" color="primary" onClick={() => { responseGoogle() }}>
-                            Đăng nhập
+                        <Button className={classesGrid.buttonLogin} variant="contained" color="primary" onClick={() => { responseGoogleFail() }}>
+                            Login
                                 </Button>
                     </Grid>
                 </Grid>
