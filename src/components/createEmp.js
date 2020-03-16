@@ -273,7 +273,7 @@ export default function CreateEmployee() {
                     'crossDomain': true,
                     'Content-Type': 'text/plain;charset=utf-8',
                 },
-                url: '/api/create',
+                url: `/api/employees/create`,
                 data: emp,
             })
                 .then(function (response) {
@@ -441,7 +441,7 @@ export default function CreateEmployee() {
                     </Grid>
                     <Grid container spacing={4}>
                         <Grid item xs={6}>
-                            <TextField value={valueIcard} onChange={checkICard} id="identification_card" label="Identification Card" variant="outlined" helperText={error.icard.msg} InputProps={{
+                            <TextField fullWidth value={valueIcard} onChange={checkICard} id="identification_card" label="Identification Card" variant="outlined" helperText={error.icard.msg} InputProps={{
                                 endAdornment: (
                                     <FingerprintIcon />
                                 ),

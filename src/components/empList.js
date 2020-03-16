@@ -218,11 +218,10 @@ export default function Employees() {
     const [datas, setDataEmp] = React.useState([]);
     const [idEmp, setIdEmp] = React.useState(0);
     const [loading, setLoading] = React.useState(false);
-    const [opa, setOpacity] = React.useState(1);
-    const classesSide = useStylesSide();
     const [openModal, setOpenModal] = React.useState(false);
     const [empData, setEmpData] = React.useState(null);
     const [isActive, setActive] = React.useState(true);
+    const [rowId, setRowId] = React.useState(true);
 
     React.useEffect(() => {
         axios.get(`/api/employees`)
@@ -247,6 +246,7 @@ export default function Employees() {
             history.push('/404');
         }
     }, [])
+
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
@@ -270,6 +270,7 @@ export default function Employees() {
 
     const openDialogDeactive = (id, i) => {
         datas[i] && datas[i].date_left != null ? setActive(false) : setActive(true);
+        setRowId(id);
         setOpen(true);
         setIdEmp(id);
     };
@@ -284,15 +285,11 @@ export default function Employees() {
 
     const agreeDeactive = (id) => {
         setOpen(false);
-        setLoading(true);
-        setOpacity(0.7);
         console.log(idEmp);
         axios.post(`/api/employees/deactiveEmp/` + idEmp)
             .then(res => {
                 const isActive = res.data;
                 console.log(isActive);
-                setLoading(false);
-                setOpacity(1);
                 window.location.reload(false);
             })
             .catch(error => {
@@ -383,176 +380,176 @@ export default function Employees() {
                                         >
                                             <VisibilityIcon />
                                         </IconButton>
-                                        {
-                                            empData != null && (
-                                                <Modal
-                                            aria-labelledby="transition-modal-title"
-                                            aria-describedby="transition-modal-description"
-                                            className={classes.modal}
-                                            open={openModal}
-                                            onClose={handleClose}
-                                            closeAfterTransition
-                                            disableAutoFocus={false}
-                                            BackdropComponent={Backdrop}
-                                            BackdropProps={{
-                                                timeout: 500,
-                                            }}
-                                        >
-                                            <div className={classes.root}>
-                                                <Paper className={classes.paperInformation}>
-                                                    <Paper className={classes.paperInformation}>
-                                                        <Grid container spacing={2}>
-                                                            <Grid item>
-                                                                <div className={classes.title}>Employee Information</div>
-                                                            </Grid>
-                                                        </Grid>
-                                                        <Grid container spacing={2}>
-                                                            <TableContainer component={Paper}>
-                                                                <Table aria-label="caption table">
-                                                                    <TableBody>
-                                                                        <TableRow>
-                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
-                                                                                ID:
-                                        </TableCell>
-                                                                            <TableCell width={'16.67%'} align="left">{empData.id}</TableCell>
-                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
-                                                                                USERNAME:
-                                        </TableCell>
-                                                                            <TableCell width={'16.67%'} align="left">{empData.emp_code}</TableCell>
-                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
-                                                                                NAME:
-                                        </TableCell>
-                                                                            <TableCell width={'16.67%'} align="left">{empData.emp_name}</TableCell>
-                                                                        </TableRow>
-                                                                        <TableRow >
-                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
-                                                                                GENDER:
-                                        </TableCell>
-                                                                            <TableCell width={'16.67%'} align="left">{empData.gender}</TableCell>
-                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
-                                                                                BIRTHDAY:
-                                        </TableCell>
-                                                                            <TableCell width={'16.67%'} align="left">{empData.dob}</TableCell>
-                                                                        </TableRow>
-                                                                    </TableBody>
-                                                                </Table>
-                                                            </TableContainer>
-                                                        </Grid>
-                                                    </Paper>
-                                                    <Paper className={classes.paperInformation}>
-                                                        <Grid container spacing={2}>
-                                                            <Grid item>
-                                                                <div className={classes.title}>Contact Information</div>
-                                                            </Grid>
-                                                        </Grid>
-                                                        <Grid container spacing={2}>
-                                                            <TableContainer component={Paper}>
-                                                                <Table aria-label="caption table">
-                                                                    <TableBody>
-                                                                        <TableRow>
-                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
-                                                                                ADDRESS:
-                                        </TableCell>
-                                                                            <TableCell width={'16.67%'} align="left">{empData.address}</TableCell>
-                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
-                                                                                IDENTIFICATION CARD:
-                                        </TableCell>
-                                                                            <TableCell width={'16.67%'} align="left">{empData.identification_card}</TableCell>
-                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
-                                                                                PHONE NUMBER:
-                                        </TableCell>
-                                                                            <TableCell width={'16.67%'} align="left">{empData.phone_number}</TableCell>
-                                                                        </TableRow>
-                                                                        <TableRow >
-                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
-                                                                                ROOM:
-                                        </TableCell>
-                                                                            <TableCell width={'16.67%'} align="left">{empData.emp_department}</TableCell>
-                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
-                                                                                POSITION:
-                                        </TableCell>
-                                                                            <TableCell width={'16.67%'} align="left">{empData.emp_title}</TableCell>
-                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
-                                                                                HIRE DATE:
-                                        </TableCell>
-                                                                            <TableCell width={'16.67%'} align="left">{empData.date_join}</TableCell>
-                                                                        </TableRow>
-                                                                        <TableRow >
-                                                                            <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
-                                                                                LEFT DATE:
-                                        </TableCell>
-                                                                            <TableCell width={'16.67%'} align="left">{empData.date_left}</TableCell>
-                                                                        </TableRow>
-                                                                    </TableBody>
-                                                                </Table>
-                                                            </TableContainer>
-                                                        </Grid>
-                                                    </Paper>
-                                                </Paper>
-                                            </div>
-                                        </Modal>
-                                            )
-                                        }
                                         <IconButton
                                             aria-label="deactive employee"
                                             onClick={() => { openDialogDeactive(row.id, i) }}
                                             color="inherit"
                                         >
-                                            {datas[i] && datas[i].date_left != null ? (<LockOpenIcon/>) : (<LockIcon/>)}
+                                            {datas[i] && datas[i].date_left != null ? (<LockOpenIcon />) : (<LockIcon />)}
                                         </IconButton>
-                                        {isActive === false ? (
-                                            <Dialog
-                                            open={openNoti}
-                                            onClose={closeDialogDeactive}
-                                            aria-labelledby="alert-dialog-title"
-                                            aria-describedby="alert-dialog-description"
-                                            style={{ opacity: 0.6, }}
-                                            color="inherit"
-                                        >
-                                            <DialogTitle id="alert-dialog-title">{"Active Employee?"}</DialogTitle>
-                                            <DialogContent>
-                                                <DialogContentText id="alert-dialog-descriptionyle">
-                                                    Do you want active this employee?
-                                        </DialogContentText>
-                                            </DialogContent>
-                                            <DialogActions>
-                                                <Button variant="contained" onClick={closeDialogDeactive} color="primary">
-                                                    Disagree
-                                            </Button>
-                                                <Button variant="contained" onClick={() => { agreeActive(row.id) }} color="primary" autoFocus>
-                                                    Agree
-                                            </Button>
-                                            </DialogActions>
-                                        </Dialog>
-                                        ) : (
-                                            <Dialog
-                                            open={openNoti}
-                                            onClose={closeDialogDeactive}
-                                            aria-labelledby="alert-dialog-title"
-                                            aria-describedby="alert-dialog-description"
-                                            style={{ opacity: 0.6, }}
-                                            color="inherit"
-                                        >
-                                            <DialogTitle id="alert-dialog-title">{"Deactive Employee?"}</DialogTitle>
-                                            <DialogContent>
-                                                <DialogContentText id="alert-dialog-descriptionyle">
-                                                    Do you want deactive this employee?
-                                        </DialogContentText>
-                                            </DialogContent>
-                                            <DialogActions>
-                                                <Button variant="contained" onClick={closeDialogDeactive} color="primary">
-                                                    Disagree
-                                            </Button>
-                                                <Button variant="contained" onClick={() => { agreeDeactive(row.id) }} color="primary" autoFocus>
-                                                    Agree
-                                            </Button>
-                                            </DialogActions>
-                                        </Dialog>
-                                        )}
-                                        
                                     </TableCell>
                                 </TableRow>
                             ))}
+                            {
+                                            empData != null && (
+                                                <Modal
+                                                    // style={{ opacity: 0.6, }}
+                                                    aria-labelledby="transition-modal-title"
+                                                    aria-describedby="transition-modal-description"
+                                                    className={classes.modal}
+                                                    open={openModal}
+                                                    onClose={handleClose}
+                                                    closeAfterTransition
+                                                    disableAutoFocus={false}
+                                                    BackdropComponent={Backdrop}
+                                                    BackdropProps={{
+                                                        timeout: 500,
+                                                    }}
+                                                >
+                                                    <div className={classes.root}>
+                                                        <Paper className={classes.paperInformation}>
+                                                            <Paper className={classes.paperInformation}>
+                                                                <Grid container spacing={2}>
+                                                                    <Grid item>
+                                                                        <div className={classes.title}>Employee Information</div>
+                                                                    </Grid>
+                                                                </Grid>
+                                                                <Grid container spacing={2}>
+                                                                    <TableContainer component={Paper}>
+                                                                        <Table aria-label="caption table">
+                                                                            <TableBody>
+                                                                                <TableRow>
+                                                                                    <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                        ID:
+                                        </TableCell>
+                                                                                    <TableCell width={'16.67%'} align="left">{empData.id}</TableCell>
+                                                                                    <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                        USERNAME:
+                                        </TableCell>
+                                                                                    <TableCell width={'16.67%'} align="left">{empData.emp_code}</TableCell>
+                                                                                    <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                        NAME:
+                                        </TableCell>
+                                                                                    <TableCell width={'16.67%'} align="left">{empData.emp_name}</TableCell>
+                                                                                </TableRow>
+                                                                                <TableRow >
+                                                                                    <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                        GENDER:
+                                        </TableCell>
+                                                                                    <TableCell width={'16.67%'} align="left">{empData.gender}</TableCell>
+                                                                                    <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                        BIRTHDAY:
+                                        </TableCell>
+                                                                                    <TableCell width={'16.67%'} align="left">{empData.dob}</TableCell>
+                                                                                </TableRow>
+                                                                            </TableBody>
+                                                                        </Table>
+                                                                    </TableContainer>
+                                                                </Grid>
+                                                            </Paper>
+                                                            <Paper className={classes.paperInformation}>
+                                                                <Grid container spacing={2}>
+                                                                    <Grid item>
+                                                                        <div className={classes.title}>Contact Information</div>
+                                                                    </Grid>
+                                                                </Grid>
+                                                                <Grid container spacing={2}>
+                                                                    <TableContainer component={Paper}>
+                                                                        <Table aria-label="caption table">
+                                                                            <TableBody>
+                                                                                <TableRow>
+                                                                                    <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                        ADDRESS:
+                                        </TableCell>
+                                                                                    <TableCell width={'16.67%'} align="left">{empData.address}</TableCell>
+                                                                                    <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                        IDENTIFICATION CARD:
+                                        </TableCell>
+                                                                                    <TableCell width={'16.67%'} align="left">{empData.identification_card}</TableCell>
+                                                                                    <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                        PHONE NUMBER:
+                                        </TableCell>
+                                                                                    <TableCell width={'16.67%'} align="left">{empData.phone_number}</TableCell>
+                                                                                </TableRow>
+                                                                                <TableRow >
+                                                                                    <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                        ROOM:
+                                        </TableCell>
+                                                                                    <TableCell width={'16.67%'} align="left">{empData.emp_department}</TableCell>
+                                                                                    <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                        POSITION:
+                                        </TableCell>
+                                                                                    <TableCell width={'16.67%'} align="left">{empData.emp_title}</TableCell>
+                                                                                    <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                        HIRE DATE:
+                                        </TableCell>
+                                                                                    <TableCell width={'16.67%'} align="left">{empData.date_join}</TableCell>
+                                                                                </TableRow>
+                                                                                <TableRow >
+                                                                                    <TableCell width={'16.67%'} className={classes.nameField} component="th" scope="row">
+                                                                                        LEFT DATE:
+                                        </TableCell>
+                                                                                    <TableCell width={'16.67%'} align="left">{empData.date_left}</TableCell>
+                                                                                </TableRow>
+                                                                            </TableBody>
+                                                                        </Table>
+                                                                    </TableContainer>
+                                                                </Grid>
+                                                            </Paper>
+                                                        </Paper>
+                                                    </div>
+                                                </Modal>
+                                            )
+                                        }
+                            {isActive === false ? (
+                                            <Dialog
+                                                open={openNoti}
+                                                onClose={closeDialogDeactive}
+                                                aria-labelledby="alert-dialog-title"
+                                                aria-describedby="alert-dialog-description"
+                                                // style={{ opacity: 0.6, }}
+                                                color="inherit"
+                                            >
+                                                <DialogTitle id="alert-dialog-title">{"Active Employee?"}</DialogTitle>
+                                                <DialogContent>
+                                                    <DialogContentText id="alert-dialog-descriptionyle">
+                                                        Do you want active this employee?
+                                        </DialogContentText>
+                                                </DialogContent>
+                                                <DialogActions>
+                                                    <Button variant="contained" onClick={closeDialogDeactive} color="primary">
+                                                        Disagree
+                                            </Button>
+                                                    <Button variant="contained" onClick={() => { agreeActive(rowId) }} color="primary" autoFocus>
+                                                        Agree
+                                            </Button>
+                                                </DialogActions>
+                                            </Dialog>
+                                        ) : (
+                                                <Dialog
+                                                    open={openNoti}
+                                                    onClose={closeDialogDeactive}
+                                                    aria-labelledby="alert-dialog-title"
+                                                    aria-describedby="alert-dialog-description"
+                                                    // style={{ opacity: 0.6, }}
+                                                    color="inherit"
+                                                >
+                                                    <DialogTitle id="alert-dialog-title">{"Deactive Employee?"}</DialogTitle>
+                                                    <DialogContent>
+                                                        <DialogContentText id="alert-dialog-descriptionyle">
+                                                            Do you want deactive this employee?
+                                        </DialogContentText>
+                                                    </DialogContent>
+                                                    <DialogActions>
+                                                        <Button variant="contained" onClick={closeDialogDeactive} color="primary">
+                                                            Disagree
+                                            </Button>
+                                                        <Button variant="contained" onClick={() => { agreeDeactive(rowId) }} color="primary" autoFocus>
+                                                            Agree
+                                            </Button>
+                                                    </DialogActions>
+                                                </Dialog>
+                                            )}
                         </TableBody>
                         <TableFooter>
                             <TableRow >
